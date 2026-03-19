@@ -1,0 +1,291 @@
+id|video_path|ground_true|label_prediction|description
+0|/home/gmonni54/agenticvad/data/ucf_crime/videos/Abuse028_x264.mp4|1|0|
+1|/home/gmonni54/agenticvad/data/ucf_crime/videos/Abuse030_x264.mp4|1|0|
+2|/home/gmonni54/agenticvad/data/ucf_crime/videos/Arrest001_x264.mp4|1|1|The frames show a physical altercation between two individuals in an office setting. One person is being forcibly restrained or attacked by another, with visible struggle and aggressive body contact. This constitutes immediate physical violence, which meets the strict definition of anomalous activity requiring an immediate security response.
+3|/home/gmonni54/agenticvad/data/ucf_crime/videos/Arrest007_x264.mp4|1|1|A person is lying motionless on the floor near a reception desk, appearing injured or incapacitated. Two uniformed individuals enter through a door and approach the person, indicating a potential emergency or security incident. This is not a normal activity and constitutes a clear security threat requiring immediate response.
+4|/home/gmonni54/agenticvad/data/ucf_crime/videos/Arrest024_x264.mp4|1|1|The frames show multiple individuals on the road, some appearing to be in a state of panic or distress, running or stumbling across the traffic lanes. This is not normal pedestrian activity and suggests a potential emergency or dangerous situation, such as a crowd incident or a person in distress requiring immediate assistance. The behavior is highly unusual and potentially threatening in a public space, warranting an immediate security response.
+5|/home/gmonni54/agenticvad/data/ucf_crime/videos/Arrest030_x264.mp4|1|1|The frames show a person in a white shirt on the floor, appearing to be in distress or injured, while another person in a white shirt is standing over them. A third person is visible in the background near the entrance. The sequence suggests a physical altercation or an accident resulting in injury. This is not a normal daily activity and presents a clear immediate security threat due to the potential for serious harm or injury.
+6|/home/gmonni54/agenticvad/data/ucf_crime/videos/Arrest039_x264.mp4|1|1|The frames show multiple uniformed personnel actively responding to a person lying on a stretcher, with medical staff attending to them. This indicates a serious medical emergency or potential injury requiring immediate intervention. The presence of security personnel and medical staff in a coordinated response suggests a dangerous or life-threatening situation, which meets the strict definition of anomalous activity as an immediate security threat.
+7|/home/gmonni54/agenticvad/data/ucf_crime/videos/Arson007_x264.mp4|1|0|
+8|/home/gmonni54/agenticvad/data/ucf_crime/videos/Arson009_x264.mp4|1|1|The frames show a white van with a person in a bright reflective suit (likely emergency personnel) standing near it. The sequence includes intense bright flashes and smoke or fire, suggesting an explosion or fire. The sudden, overwhelming light and smoke indicate a serious, immediate security threat requiring immediate response.
+9|/home/gmonni54/agenticvad/data/ucf_crime/videos/Arson010_x264.mp4|1|1|The frames show a physical altercation between two individuals near a white van. One person is being forcibly pushed or dragged by another, suggesting a violent confrontation. This behavior constitutes immediate physical violence, which meets the strict definition of anomalous activity requiring an immediate security response.
+10|/home/gmonni54/agenticvad/data/ucf_crime/videos/Arson011_x264.mp4|1|1|The frames show a person in an elevator holding a firearm and pointing it directly at another individual. The subsequent frame shows a bright, intense flame or explosion, indicating a violent act. This constitutes an immediate security threat through physical violence and potential fire/explosion, meeting the strict definition of anomalous activity.
+11|/home/gmonni54/agenticvad/data/ucf_crime/videos/Arson016_x264.mp4|1|1|A fire is actively burning on the floor of a bus, near the front seats. This is a clear and immediate security threat as it poses a significant risk of fire spreading and causing severe injury or death to passengers. The fire is not a normal occurrence in this context and requires immediate intervention.
+12|/home/gmonni54/agenticvad/data/ucf_crime/videos/Arson018_x264.mp4|1|0|
+13|/home/gmonni54/agenticvad/data/ucf_crime/videos/Arson022_x264.mp4|1|0|
+14|/home/gmonni54/agenticvad/data/ucf_crime/videos/Arson035_x264.mp4|1|1|The frames show a white van driving down a narrow street at 04:59 AM. In the fifth frame, the van suddenly accelerates and collides with a stationary object (likely a parked vehicle or barrier) on the left, causing a massive explosion or impact that engulfs the van in bright light and debris. This is a clear, immediate physical threat and dangerous event, exceeding normal daily activity.
+15|/home/gmonni54/agenticvad/data/ucf_crime/videos/Arson041_x264.mp4|1|1|The frames show a rapidly escalating fire with intense flames and smoke, indicating a severe and immediate security threat. This is not a normal event and requires immediate response to prevent further damage or injury.
+16|/home/gmonni54/agenticvad/data/ucf_crime/videos/Assault006_x264.mp4|1|1|The frames show two individuals in a store, one of whom is forcefully restraining or attacking the other. The physical struggle, aggressive body language, and the context of a retail environment suggest a violent altercation. This clearly meets the strict definition of anomalous activity as it involves physical violence and poses an immediate security threat.
+17|/home/gmonni54/agenticvad/data/ucf_crime/videos/Assault010_x264.mp4|1|0|
+18|/home/gmonni54/agenticvad/data/ucf_crime/videos/Assault011_x264.mp4|1|0|
+19|/home/gmonni54/agenticvad/data/ucf_crime/videos/Burglary005_x264.mp4|1|0|
+20|/home/gmonni54/agenticvad/data/ucf_crime/videos/Burglary017_x264.mp4|1|1|A person is seen in frames 4-6 actively struggling with or attempting to remove a large object from a counter or shelf. The motion is forceful and unusual for a typical office or reception area, suggesting potential theft or sabotage. This behavior deviates significantly from normal activity and poses a security risk, warranting immediate response.
+21|/home/gmonni54/agenticvad/data/ucf_crime/videos/Burglary018_x264.mp4|1|1|The frames show a person in a hoodie and mask forcibly entering a building through a doorway, with visible aggressive body language and movement. The individual appears to be attempting to break in or forcibly enter a secure area, which constitutes a clear immediate security threat under the strict definition of anomalous activity.
+22|/home/gmonni54/agenticvad/data/ucf_crime/videos/Burglary021_x264.mp4|1|0|
+23|/home/gmonni54/agenticvad/data/ucf_crime/videos/Burglary024_x264.mp4|1|0|
+24|/home/gmonni54/agenticvad/data/ucf_crime/videos/Burglary032_x264.mp4|1|0|
+25|/home/gmonni54/agenticvad/data/ucf_crime/videos/Burglary033_x264.mp4|1|0|
+26|/home/gmonni54/agenticvad/data/ucf_crime/videos/Burglary035_x264.mp4|1|0|
+27|/home/gmonni54/agenticvad/data/ucf_crime/videos/Burglary037_x264.mp4|1|1|The frames show a person in a white garment aggressively handling a large, dark object that appears to be a firearm. The individual is bent over, manipulating the weapon in a manner consistent with loading, aiming, or preparing for use. This behavior, especially in a confined indoor space at night, constitutes a clear and serious security threat due to the potential for immediate violence or harm. The activity is not normal daily behavior and meets the strict definition of anomalous activity.
+28|/home/gmonni54/agenticvad/data/ucf_crime/videos/Burglary061_x264.mp4|1|0|
+29|/home/gmonni54/agenticvad/data/ucf_crime/videos/Burglary076_x264.mp4|1|0|
+30|/home/gmonni54/agenticvad/data/ucf_crime/videos/Burglary079_x264.mp4|1|1|The frames show multiple individuals in a parking area near a vehicle with its trunk open. One person is actively engaged in a physical altercation with another individual, who is on the ground. This constitutes a clear and serious physical confrontation, which meets the strict definition of anomalous activity as it involves immediate physical violence and potential injury. The behavior is not normal daily activity and requires immediate security response.
+31|/home/gmonni54/agenticvad/data/ucf_crime/videos/Burglary092_x264.mp4|1|0|
+32|/home/gmonni54/agenticvad/data/ucf_crime/videos/Explosion002_x264.mp4|1|1|The frames show a sudden and intense fire erupting from a gas pump, with flames spreading rapidly across the concrete floor. This is a clear, immediate security threat due to the potential for severe injury, property damage, and fire hazard in a fueling station environment. The activity is not normal and requires immediate security response.
+33|/home/gmonni54/agenticvad/data/ucf_crime/videos/Explosion004_x264.mp4|1|1|The frames show a sudden, massive explosion or fire event with intense light and smoke, followed by obscured visibility. This is clearly a dangerous, immediate security threat requiring emergency response.
+34|/home/gmonni54/agenticvad/data/ucf_crime/videos/Explosion007_x264.mp4|1|1|The frames depict a scene filled with dense smoke or fog, with multiple human figures moving erratically and chaotically. In one frame, a person is seen falling or being thrown, and another frame shows a figure appearing to be in distress or actively engaged in a violent struggle. The environment is obscured, suggesting a hazardous situation such as a fire, explosion, or chemical release. The behavior of the individuals is not consistent with normal daily activity and indicates immediate danger or physical violence, meeting the strict definition of anomalous activity requiring an immediate security response.
+35|/home/gmonni54/agenticvad/data/ucf_crime/videos/Explosion008_x264.mp4|1|1|The frames show a sudden and massive explosion with thick black smoke billowing into the sky, followed by visible fire and debris. This is a clear, immediate security threat involving physical violence and destruction, far exceeding normal daily activity.
+36|/home/gmonni54/agenticvad/data/ucf_crime/videos/Explosion010_x264.mp4|1|1|The frames show a static outdoor scene with trees and equipment, but the overlaid text explicitly states 'Raw Video: Pike River 4th explosion' and 'courtesy New Zealand Police'. This indicates a catastrophic event (an explosion) that is an immediate and serious security threat, meeting the strict definition of anomalous activity.
+37|/home/gmonni54/agenticvad/data/ucf_crime/videos/Explosion011_x264.mp4|1|1|A bus emitting a large plume of white smoke is observed on the road, which is unusual for normal traffic. While smoke from vehicles can be common, the volume and sudden appearance of smoke in this context suggest a mechanical failure or potential fire hazard, which qualifies as a serious security threat under the strict definition. The smoke is not just a minor emission but a significant visual indicator of danger.
+38|/home/gmonni54/agenticvad/data/ucf_crime/videos/Explosion013_x264.mp4|1|1|The frames show a rapid, intense flash of bright light and motion blur, followed by a scene dominated by intense orange and red hues, suggesting a fire or explosion. The visual distortion and sudden change in lighting are indicative of a severe, immediate security threat. This clearly exceeds normal operational conditions and requires immediate response.
+39|/home/gmonni54/agenticvad/data/ucf_crime/videos/Explosion016_x264.mp4|1|1|The frames show a large building emitting thick smoke from its central section, indicating a fire or explosion. This is a clear and serious security threat requiring immediate response. The smoke is dense and rising, suggesting active and potentially dangerous combustion.
+40|/home/gmonni54/agenticvad/data/ucf_crime/videos/Explosion017_x264.mp4|1|1|A motorcycle catches fire in the gas station area, with flames visibly spreading and engulfing the vehicle. This is a clear and immediate security threat due to the risk of fire spreading to other vehicles or structures, requiring immediate response.
+41|/home/gmonni54/agenticvad/data/ucf_crime/videos/Explosion020_x264.mp4|1|1|In frame 5, a bright flash and visible smoke or fire erupt from the side of the black SUV, indicating a sudden and severe incident. This is not a normal event and constitutes an immediate security threat due to the potential for fire, explosion, or hazardous material release. The behavior of the individuals nearby (e.g., one person reacting by stepping back) further suggests danger. This meets the strict definition of anomalous activity.
+42|/home/gmonni54/agenticvad/data/ucf_crime/videos/Explosion021_x264.mp4|1|1|The frames show a sudden, massive explosion with intense fire and light, which is a clear and immediate security threat. This event is not a normal occurrence and requires immediate response.
+43|/home/gmonni54/agenticvad/data/ucf_crime/videos/Explosion022_x264.mp4|1|1|The frames show a large, intense fire engulfing what appears to be an industrial or storage facility. There is visible smoke, bright flames, and structural damage. This is not a normal event and constitutes a clear, immediate security threat due to the potential for widespread destruction, injury, or loss of life. The fire is actively spreading and is not a minor or incidental occurrence.
+44|/home/gmonni54/agenticvad/data/ucf_crime/videos/Explosion025_x264.mp4|1|0|
+45|/home/gmonni54/agenticvad/data/ucf_crime/videos/Explosion027_x264.mp4|1|0|
+46|/home/gmonni54/agenticvad/data/ucf_crime/videos/Explosion028_x264.mp4|1|0|
+47|/home/gmonni54/agenticvad/data/ucf_crime/videos/Explosion029_x264.mp4|1|1|A person is standing next to a vehicle at a gas pump. In the subsequent frame, a large fire erupts near the vehicle, indicating a severe accident or explosion. This is a clear and immediate security threat requiring an emergency response.
+48|/home/gmonni54/agenticvad/data/ucf_crime/videos/Explosion033_x264.mp4|1|1|A large plume of black smoke is suddenly visible in the background, indicating a fire or explosion. This is a clear and immediate security threat requiring an emergency response.
+49|/home/gmonni54/agenticvad/data/ucf_crime/videos/Explosion035_x264.mp4|1|1|The frames show a room in severe disarray with debris scattered across the floor, overturned furniture, and a visible fire or intense heat source in the background. The presence of a fire or explosion is a clear and immediate security threat, meeting the strict definition of anomalous activity as it poses a direct danger to life and property.
+50|/home/gmonni54/agenticvad/data/ucf_crime/videos/Explosion036_x264.mp4|1|1|The frames show a rapid escalation of a dangerous situation: multiple individuals are running away from a large, expanding cloud of smoke or fire, indicating an active fire or explosion. The presence of visible flames and the panicked evacuation of people strongly suggest an immediate and severe security threat requiring urgent response. This clearly meets the strict definition of anomalous activity as an immediate security threat.
+51|/home/gmonni54/agenticvad/data/ucf_crime/videos/Explosion039_x264.mp4|1|1|The frames show a person in dark clothing aggressively confronting another individual at a table, with the aggressor appearing to be physically restraining or attacking them. This is not a normal activity and constitutes a clear immediate security threat through physical violence, meeting the strict definition of anomalous activity.
+52|/home/gmonni54/agenticvad/data/ucf_crime/videos/Explosion043_x264.mp4|1|0|
+53|/home/gmonni54/agenticvad/data/ucf_crime/videos/Fighting003_x264.mp4|1|1|The frames show a group of individuals in a public transit area engaging in a sudden, chaotic, and aggressive physical altercation. One person is being forcibly pushed or pulled, and others are involved in what appears to be a violent struggle. This behavior is not normal daily activity and constitutes a clear immediate security threat due to the physical violence and potential for injury or escalation.
+54|/home/gmonni54/agenticvad/data/ucf_crime/videos/Fighting018_x264.mp4|1|1|The frames depict a confrontation in a tunnel where one individual is being physically restrained or attacked by others. This is not a normal activity and involves physical violence, which meets the strict definition of anomalous activity as an immediate security threat.
+55|/home/gmonni54/agenticvad/data/ucf_crime/videos/Fighting033_x264.mp4|1|1|The frames depict a violent physical altercation in a confined tunnel space. One individual is seen grappling with another, followed by multiple people being thrown to the ground and appearing to be injured or incapacitated. This constitutes clear physical violence and potential serious injury, meeting the strict definition of anomalous activity requiring immediate security response.
+56|/home/gmonni54/agenticvad/data/ucf_crime/videos/Fighting042_x264.mp4|1|1|The frames show two individuals in a physical altercation at a doorway. One person is being forcibly restrained or attacked by the other, with aggressive body contact and apparent struggle. This constitutes a clear immediate security threat due to physical violence, which meets the strict definition of anomalous activity requiring an immediate security response.
+57|/home/gmonni54/agenticvad/data/ucf_crime/videos/Fighting047_x264.mp4|1|1|The frames depict a physical altercation between multiple individuals in what appears to be an auto repair shop. One person is being restrained or attacked by others, and another individual is actively intervening with a raised hand, suggesting a violent or threatening confrontation. This behavior clearly constitutes a serious security threat and falls under the strict definition of anomalous activity due to the presence of physical violence and potential for injury.
+58|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_003_x264.mp4|0|0|
+59|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_006_x264.mp4|0|0|
+60|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_010_x264.mp4|0|0|
+61|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_014_x264.mp4|0|0|
+62|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_015_x264.mp4|0|0|
+63|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_018_x264.mp4|0|0|
+64|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_019_x264.mp4|0|0|
+65|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_024_x264.mp4|0|0|
+66|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_025_x264.mp4|0|0|
+67|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_027_x264.mp4|0|0|
+68|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_033_x264.mp4|0|0|
+69|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_034_x264.mp4|0|0|
+70|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_041_x264.mp4|0|0|
+71|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_042_x264.mp4|0|0|
+72|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_048_x264.mp4|0|0|
+73|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_050_x264.mp4|0|0|
+74|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_051_x264.mp4|0|0|
+75|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_056_x264.mp4|0|0|
+76|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_059_x264.mp4|0|0|
+77|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_063_x264.mp4|0|0|
+78|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_067_x264.mp4|0|0|
+79|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_070_x264.mp4|0|0|
+80|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_100_x264.mp4|0|0|
+81|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_129_x264.mp4|0|0|
+82|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_150_x264.mp4|0|0|
+83|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_168_x264.mp4|0|0|
+84|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_175_x264.mp4|0|0|
+85|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_182_x264.mp4|0|0|
+86|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_189_x264.mp4|0|0|
+87|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_196_x264.mp4|0|0|
+88|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_203_x264.mp4|0|0|
+89|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_210_x264.mp4|0|0|
+90|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_217_x264.mp4|0|0|
+91|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_224_x264.mp4|0|0|
+92|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_246_x264.mp4|0|0|
+93|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_247_x264.mp4|0|0|
+94|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_248_x264.mp4|0|0|
+95|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_251_x264.mp4|0|0|
+96|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_289_x264.mp4|0|0|
+97|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_310_x264.mp4|0|0|
+98|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_312_x264.mp4|0|0|
+99|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_317_x264.mp4|0|0|
+100|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_345_x264.mp4|0|0|
+101|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_352_x264.mp4|0|0|
+102|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_360_x264.mp4|0|0|
+103|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_365_x264.mp4|0|0|
+104|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_401_x264.mp4|0|0|
+105|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_417_x264.mp4|0|0|
+106|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_439_x264.mp4|0|0|
+107|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_452_x264.mp4|0|0|
+108|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_453_x264.mp4|0|0|
+109|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_478_x264.mp4|0|0|
+110|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_576_x264.mp4|0|0|
+111|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_597_x264.mp4|0|0|
+112|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_603_x264.mp4|0|0|
+113|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_606_x264.mp4|0|0|
+114|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_621_x264.mp4|0|0|
+115|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_634_x264.mp4|0|0|
+116|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_641_x264.mp4|0|0|
+117|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_656_x264.mp4|0|0|
+118|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_686_x264.mp4|0|0|
+119|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_696_x264.mp4|0|0|
+120|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_702_x264.mp4|0|0|
+121|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_704_x264.mp4|0|0|
+122|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_710_x264.mp4|0|0|
+123|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_717_x264.mp4|0|0|
+124|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_722_x264.mp4|0|0|
+125|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_725_x264.mp4|0|0|
+126|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_745_x264.mp4|0|0|
+127|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_758_x264.mp4|0|0|
+128|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_778_x264.mp4|0|0|
+129|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_780_x264.mp4|0|0|
+130|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_781_x264.mp4|0|0|
+131|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_782_x264.mp4|0|0|
+132|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_783_x264.mp4|0|0|
+133|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_798_x264.mp4|0|0|
+134|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_801_x264.mp4|0|0|
+135|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_828_x264.mp4|0|0|
+136|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_831_x264.mp4|0|0|
+137|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_866_x264.mp4|0|0|
+138|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_867_x264.mp4|0|0|
+139|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_868_x264.mp4|0|0|
+140|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_869_x264.mp4|0|0|
+141|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_870_x264.mp4|0|0|
+142|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_871_x264.mp4|0|0|
+143|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_872_x264.mp4|0|0|
+144|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_873_x264.mp4|0|0|
+145|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_874_x264.mp4|0|0|
+146|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_875_x264.mp4|0|0|
+147|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_876_x264.mp4|0|0|
+148|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_877_x264.mp4|0|0|
+149|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_878_x264.mp4|0|0|
+150|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_879_x264.mp4|0|0|
+151|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_880_x264.mp4|0|0|
+152|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_881_x264.mp4|0|0|
+153|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_882_x264.mp4|0|0|
+154|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_883_x264.mp4|0|0|
+155|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_884_x264.mp4|0|0|
+156|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_885_x264.mp4|0|0|
+157|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_886_x264.mp4|0|0|
+158|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_887_x264.mp4|0|0|
+159|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_888_x264.mp4|0|0|
+160|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_889_x264.mp4|0|0|
+161|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_890_x264.mp4|0|0|
+162|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_891_x264.mp4|0|0|
+163|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_892_x264.mp4|0|0|
+164|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_893_x264.mp4|0|0|
+165|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_894_x264.mp4|0|0|
+166|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_895_x264.mp4|0|0|
+167|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_896_x264.mp4|0|0|
+168|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_897_x264.mp4|0|0|
+169|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_898_x264.mp4|0|0|
+170|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_899_x264.mp4|0|0|
+171|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_900_x264.mp4|0|0|
+172|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_901_x264.mp4|0|0|
+173|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_902_x264.mp4|0|0|
+174|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_903_x264.mp4|0|0|
+175|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_904_x264.mp4|0|0|
+176|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_905_x264.mp4|0|0|
+177|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_906_x264.mp4|0|0|
+178|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_907_x264.mp4|0|1|The frames show a multi-vehicle collision at an intersection involving a yellow school bus and several other cars. The vehicles are visibly entangled, with one car flipped onto its side and another overturned, indicating a severe accident. This is not a normal traffic event and constitutes a serious safety hazard requiring immediate security response.
+179|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_908_x264.mp4|0|0|
+180|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_909_x264.mp4|0|1|A bright, intense flash of light and a visible explosion occur on the highway overpass in frame 5. This is not a normal event and indicates a sudden, dangerous incident that poses an immediate threat to life and property. The subsequent frames show the aftermath with smoke and debris, confirming a serious security threat.
+181|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_910_x264.mp4|0|0|
+182|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_911_x264.mp4|0|0|
+183|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_912_x264.mp4|0|0|
+184|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_913_x264.mp4|0|0|
+185|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_914_x264.mp4|0|0|
+186|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_915_x264.mp4|0|0|
+187|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_923_x264.mp4|0|0|
+188|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_924_x264.mp4|0|1|In the frames, one individual is on the floor near a counter, appearing to be in distress or incapacitated, while another person is standing nearby. The standing individual then begins to move aggressively, lunging or attempting to strike the person on the ground. This behavior constitutes a clear and immediate security threat involving physical violence, which meets the strict definition of anomalous activity requiring an immediate security response.
+189|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_925_x264.mp4|0|1|The frames show a rapid, intense bright flash that appears to be an explosion or fire, followed by a bright, overwhelming light that obscures the scene. This is not a normal event and constitutes a clear immediate security threat due to the potential for widespread damage and danger.
+190|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_926_x264.mp4|0|0|
+191|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_927_x264.mp4|0|0|
+192|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_928_x264.mp4|0|0|
+193|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_929_x264.mp4|0|0|
+194|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_930_x264.mp4|0|0|
+195|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_931_x264.mp4|0|0|
+196|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_932_x264.mp4|0|0|
+197|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_933_x264.mp4|0|0|
+198|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_934_x264.mp4|0|0|
+199|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_935_x264.mp4|0|1|A person is lying motionless on the floor in what appears to be a public transit or shopping mall. Multiple individuals are approaching and observing the person, with one person standing over them and another appearing to assist. This is not a normal activity and suggests a potential accident or medical emergency. The situation requires immediate security response to ensure the person's safety and to assess the situation.
+200|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_936_x264.mp4|0|0|
+201|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_937_x264.mp4|0|0|
+202|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_938_x264.mp4|0|0|
+203|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_939_x264.mp4|0|0|
+204|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_940_x264.mp4|0|0|
+205|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_941_x264.mp4|0|0|
+206|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_943_x264.mp4|0|0|
+207|/home/gmonni54/agenticvad/data/ucf_crime/videos/Normal_Videos_944_x264.mp4|0|0|
+208|/home/gmonni54/agenticvad/data/ucf_crime/videos/RoadAccidents001_x264.mp4|1|1|A bright, intense flash of light followed by a large fire or explosion occurs outside the gate in the sequence of frames. This is not a normal event and indicates a significant, immediate security threat. The suddenness and intensity of the flash and fire suggest a dangerous incident requiring immediate response.
+209|/home/gmonni54/agenticvad/data/ucf_crime/videos/RoadAccidents002_x264.mp4|1|1|The frames depict a large bus that has collided with a person or object on the sidewalk, causing a violent, explosive-like impact with debris and smoke. Multiple pedestrians are scattered or running away, indicating a sudden, severe accident. This is not a normal event and constitutes a clear, immediate security threat due to the potential for serious injury or death.
+210|/home/gmonni54/agenticvad/data/ucf_crime/videos/RoadAccidents004_x264.mp4|1|0|
+211|/home/gmonni54/agenticvad/data/ucf_crime/videos/RoadAccidents009_x264.mp4|1|0|
+212|/home/gmonni54/agenticvad/data/ucf_crime/videos/RoadAccidents010_x264.mp4|1|0|
+213|/home/gmonni54/agenticvad/data/ucf_crime/videos/RoadAccidents011_x264.mp4|1|0|
+214|/home/gmonni54/agenticvad/data/ucf_crime/videos/RoadAccidents012_x264.mp4|1|1|The frames show a sequence of a vehicle (a dark-colored SUV) losing control and rolling over in a multi-vehicle collision at an intersection. This is not a normal event and involves severe physical damage and potential for serious injury or death, meeting the strict definition of anomalous activity as an immediate security threat.
+215|/home/gmonni54/agenticvad/data/ucf_crime/videos/RoadAccidents016_x264.mp4|1|0|
+216|/home/gmonni54/agenticvad/data/ucf_crime/videos/RoadAccidents017_x264.mp4|1|1|The frames show multiple vehicles in a street intersection with significant debris and smoke, indicating a severe accident or collision. The vehicles are visibly damaged and emitting smoke, suggesting fire or explosion risk. This is not normal traffic activity and poses an immediate security threat due to potential for injury, fire, or further structural damage.
+217|/home/gmonni54/agenticvad/data/ucf_crime/videos/RoadAccidents019_x264.mp4|1|1|The frames show a dark-colored vehicle that has collided with a motorcycle, resulting in the motorcycle lying on its side and at least one person lying motionless on the ground. Another person is seen on the ground nearby. This indicates a severe accident involving injury or potential fatality, which meets the strict definition of anomalous activity as it poses an immediate security threat due to the potential for serious injury or death.
+218|/home/gmonni54/agenticvad/data/ucf_crime/videos/RoadAccidents020_x264.mp4|1|1|The frames show a motorcycle rider falling and lying motionless on the road after a collision with a white car. Debris is scattered, and the rider appears to be injured or deceased. This is not a normal traffic incident; it is a severe accident involving potential injury or fatality, which meets the strict definition of anomalous activity requiring immediate security response.
+219|/home/gmonni54/agenticvad/data/ucf_crime/videos/RoadAccidents021_x264.mp4|1|0|
+220|/home/gmonni54/agenticvad/data/ucf_crime/videos/RoadAccidents022_x264.mp4|1|1|A red vehicle collides with a dark-colored vehicle in the middle of a crosswalk, causing the dark vehicle to flip over. Multiple cyclists are present in the vicinity, and the crash appears to be severe. This is not a normal traffic event and poses an immediate risk of injury or death to the occupants involved, meeting the strict definition of anomalous activity.
+221|/home/gmonni54/agenticvad/data/ucf_crime/videos/RoadAccidents121_x264.mp4|1|1|A black vehicle is overturned on a road, with debris scattered around and a white vehicle stopped nearby. A person in red clothing is seen approaching the overturned vehicle, and other individuals are visible in the background. This indicates a severe accident with potential for serious injury or death, meeting the strict definition of anomalous activity as it poses an immediate security threat.
+222|/home/gmonni54/agenticvad/data/ucf_crime/videos/RoadAccidents122_x264.mp4|1|0|
+223|/home/gmonni54/agenticvad/data/ucf_crime/videos/RoadAccidents123_x264.mp4|1|0|
+224|/home/gmonni54/agenticvad/data/ucf_crime/videos/RoadAccidents124_x264.mp4|1|1|The frames show a vehicle (appearing to be a dark-colored sedan) that has been severely damaged and is lying on its side on the road, with debris scattered around. The vehicle appears to have crashed into a structure or barrier, and there is visible smoke or dust clouding the area. This indicates a serious accident with potential for injury or property damage, which meets the strict definition of anomalous activity as it poses an immediate security threat.
+225|/home/gmonni54/agenticvad/data/ucf_crime/videos/RoadAccidents125_x264.mp4|1|1|A large truck has overturned across a road intersection, blocking traffic and creating a hazardous situation. A person is standing near the wreckage, which indicates a potential accident scene requiring immediate emergency response. This is not a normal activity and poses a clear immediate security threat due to the risk of injury or further accident.
+226|/home/gmonni54/agenticvad/data/ucf_crime/videos/RoadAccidents127_x264.mp4|1|1|The frames show a red semi-truck colliding with a train at a level crossing. The impact is violent, with visible debris and the truck being thrown off course. This is a clear, immediate physical accident involving a major vehicle collision with a train, which constitutes a serious security threat due to the potential for severe injury or death, and is not a normal daily activity.
+227|/home/gmonni54/agenticvad/data/ucf_crime/videos/RoadAccidents128_x264.mp4|1|0|
+228|/home/gmonni54/agenticvad/data/ucf_crime/videos/RoadAccidents131_x264.mp4|1|1|A vehicle appears to have collided with a pedestrian or object at the crosswalk, resulting in a large plume of smoke or debris. The subsequent frames show the vehicle stationary with smoke billowing, indicating a severe accident or potential fire. This is not a normal daily activity and constitutes a clear, immediate security threat due to the potential for injury or fire.
+229|/home/gmonni54/agenticvad/data/ucf_crime/videos/RoadAccidents132_x264.mp4|1|0|
+230|/home/gmonni54/agenticvad/data/ucf_crime/videos/RoadAccidents133_x264.mp4|1|1|The frames show a white van driving erratically, followed by a motorcycle rider who is suddenly thrown from the bike and lands on the road. In the subsequent frames, the rider is on fire, indicating a severe accident with a fire hazard. This is a clear and serious anomalous event involving severe injury and fire, which meets the strict definition of an immediate security threat.
+231|/home/gmonni54/agenticvad/data/ucf_crime/videos/Robbery048_x264.mp4|1|0|
+232|/home/gmonni54/agenticvad/data/ucf_crime/videos/Robbery050_x264.mp4|1|0|
+233|/home/gmonni54/agenticvad/data/ucf_crime/videos/Robbery102_x264.mp4|1|1|The frames show a man forcefully grabbing and dragging a woman away from a parked car in what appears to be a residential driveway. This is not a normal activity and constitutes a clear physical assault, which meets the strict definition of anomalous activity as an immediate security threat.
+234|/home/gmonni54/agenticvad/data/ucf_crime/videos/Robbery106_x264.mp4|1|0|
+235|/home/gmonni54/agenticvad/data/ucf_crime/videos/Robbery137_x264.mp4|1|1|The frames depict a group of individuals in dark clothing, some wearing hoods, surrounding a cashier at a checkout counter. One individual is actively interacting with the cashier and the register, while others stand nearby in a manner that suggests coordinated activity. The presence of multiple masked individuals in a retail setting, combined with their focused behavior around the cashier, indicates a potential security threat such as a robbery or attempted theft. This behavior is highly unusual and dangerous in a retail environment, meeting the strict definition of anomalous activity.
+236|/home/gmonni54/agenticvad/data/ucf_crime/videos/Shooting002_x264.mp4|1|0|
+237|/home/gmonni54/agenticvad/data/ucf_crime/videos/Shooting004_x264.mp4|1|0|
+238|/home/gmonni54/agenticvad/data/ucf_crime/videos/Shooting007_x264.mp4|1|0|
+239|/home/gmonni54/agenticvad/data/ucf_crime/videos/Shooting008_x264.mp4|1|1|The frames show a person in dark clothing falling or being pushed onto the floor near a shopping cart, with another person lying motionless nearby. The sequence suggests a violent or aggressive incident, possibly involving physical assault or a fall from height, which constitutes a clear and serious security threat under the strict definition. The presence of a shopping cart and the context of a public space (likely a supermarket) further indicates a dangerous situation requiring immediate intervention.
+240|/home/gmonni54/agenticvad/data/ucf_crime/videos/Shooting010_x264.mp4|1|0|
+241|/home/gmonni54/agenticvad/data/ucf_crime/videos/Shooting011_x264.mp4|1|1|The frames show multiple individuals in dark clothing entering a commercial establishment through a glass door, with one person wearing a helmet and another holding a long object resembling a baton or pole. This behavior is highly unusual and potentially threatening, especially given the context of a public or commercial space. The presence of multiple individuals in suspicious attire, combined with the object being carried, indicates a potential security threat or violent intent, which meets the strict definition of anomalous activity requiring immediate response.
+242|/home/gmonni54/agenticvad/data/ucf_crime/videos/Shooting013_x264.mp4|1|1|The frames show a person in a hoodie moving rapidly down a staircase while holding a long, glowing object that appears to be a weapon or explosive device. The person's posture and motion suggest urgency and potential threat. The glowing object is highly unusual and potentially dangerous in a security context, indicating a clear and serious anomalous activity that requires immediate response.
+243|/home/gmonni54/agenticvad/data/ucf_crime/videos/Shooting015_x264.mp4|1|0|
+244|/home/gmonni54/agenticvad/data/ucf_crime/videos/Shooting018_x264.mp4|1|1|The frames show a person lying motionless on the floor in what appears to be a convenience store, while other individuals are standing around. The person on the floor is not moving, and the surrounding individuals are not providing immediate assistance, suggesting a possible severe injury or medical emergency. This is not a normal daily activity and constitutes a clear security threat requiring immediate response.
+245|/home/gmonni54/agenticvad/data/ucf_crime/videos/Shooting019_x264.mp4|1|1|The frames show a person in a dark vehicle with a large, bright, glowing object (possibly a firework or explosive device) being thrown or dropped near the car. The object emits a bright flash and smoke, indicating a potentially dangerous or explosive event. This is not a normal activity and poses an immediate security threat due to the potential for fire, explosion, or injury.
+246|/home/gmonni54/agenticvad/data/ucf_crime/videos/Shooting021_x264.mp4|1|0|
+247|/home/gmonni54/agenticvad/data/ucf_crime/videos/Shooting022_x264.mp4|1|1|In the frames, a person in a striped shirt is seen forcefully pushing or pulling another individual through a doorway, while others in the room react with alarm. The person being pushed appears to be struggling, and in the final frame, multiple individuals are reacting with sudden movement, suggesting a physical altercation or attempted forced entry. This behavior is not normal and constitutes a clear immediate security threat due to physical confrontation and potential harm.
+248|/home/gmonni54/agenticvad/data/ucf_crime/videos/Shooting024_x264.mp4|1|0|
+249|/home/gmonni54/agenticvad/data/ucf_crime/videos/Shooting026_x264.mp4|1|0|
+250|/home/gmonni54/agenticvad/data/ucf_crime/videos/Shooting028_x264.mp4|1|1|The frames show a large amount of smoke or dust filling the room, obscuring visibility and indicating a significant incident such as a fire, explosion, or severe accident. The presence of smoke in an indoor commercial setting is a clear and serious security threat requiring immediate response. The timestamp shows the event is ongoing and escalating, with figures moving in the smoke, suggesting potential injury or danger. This meets the strict definition of anomalous activity as an immediate security threat.
+251|/home/gmonni54/agenticvad/data/ucf_crime/videos/Shooting032_x264.mp4|1|1|A person is seen falling to the ground and lying motionless after a sudden movement, while another individual approaches. This indicates a severe accident or injury, which qualifies as an immediate security threat under the strict definition. The fall appears uncontrolled and the person remains on the ground, suggesting possible serious harm.
+252|/home/gmonni54/agenticvad/data/ucf_crime/videos/Shooting033_x264.mp4|1|0|
+253|/home/gmonni54/agenticvad/data/ucf_crime/videos/Shooting034_x264.mp4|1|1|A person is seen running across the street toward a parked car, and in subsequent frames, another individual is seen running toward them, suggesting a confrontation or potential physical altercation. This behavior is highly unusual and potentially dangerous in a public space, meeting the strict definition of anomalous activity as it poses an immediate security threat.
+254|/home/gmonni54/agenticvad/data/ucf_crime/videos/Shooting037_x264.mp4|1|0|
+255|/home/gmonni54/agenticvad/data/ucf_crime/videos/Shooting043_x264.mp4|1|1|The frames show a dark vehicle (likely an SUV) with its rear doors open and people actively engaged around it in a confined, possibly commercial space. The vehicle is positioned in a way that suggests it is either being loaded/unloaded or has been improperly parked, potentially blocking access. The presence of multiple individuals and the vehicle's position indicate a potentially dangerous or unauthorized situation. While not explicitly violent, the scene is highly unusual and could indicate a security breach, illegal activity, or imminent danger. The lighting and camera angle suggest a surveillance setup, making this activity suspicious and requiring immediate attention.
+256|/home/gmonni54/agenticvad/data/ucf_crime/videos/Shooting046_x264.mp4|1|1|The frames show three individuals at an ATM kiosk. Two are wearing masks and appear to be attempting to rob the ATMs, while the third person is actively engaging in a physical altercation with one of the masked individuals, causing them to fall. This constitutes a clear and serious security threat involving physical violence and potential criminal activity, meeting the strict definition of anomalous activity.
+257|/home/gmonni54/agenticvad/data/ucf_crime/videos/Shooting047_x264.mp4|1|1|The frames display text overlaying a black screen that explicitly states 'Surveillance video shows the shooting of Miami-Dade Police Officer John Saavedra and the shooting death of a growhouse suspect.' This directly describes a violent, life-threatening event involving a police officer and a suspect. Under the strict definition, this qualifies as a clear and serious anomalous activity requiring immediate security response.
+258|/home/gmonni54/agenticvad/data/ucf_crime/videos/Shooting048_x264.mp4|1|1|A man in a white shirt is aggressively pulling a desk apart in what appears to be a bank or office setting. His actions are forceful and destructive, indicating a clear intent to cause damage or create a security threat. This behavior is not normal and constitutes a serious security risk.
+259|/home/gmonni54/agenticvad/data/ucf_crime/videos/Shoplifting001_x264.mp4|1|0|
+260|/home/gmonni54/agenticvad/data/ucf_crime/videos/Shoplifting004_x264.mp4|1|0|
+261|/home/gmonni54/agenticvad/data/ucf_crime/videos/Shoplifting005_x264.mp4|1|0|
+262|/home/gmonni54/agenticvad/data/ucf_crime/videos/Shoplifting007_x264.mp4|1|0|
+263|/home/gmonni54/agenticvad/data/ucf_crime/videos/Shoplifting010_x264.mp4|1|0|
+264|/home/gmonni54/agenticvad/data/ucf_crime/videos/Shoplifting015_x264.mp4|1|0|
+265|/home/gmonni54/agenticvad/data/ucf_crime/videos/Shoplifting016_x264.mp4|1|0|
+266|/home/gmonni54/agenticvad/data/ucf_crime/videos/Shoplifting017_x264.mp4|1|0|
+267|/home/gmonni54/agenticvad/data/ucf_crime/videos/Shoplifting020_x264.mp4|1|1|The frames show a man in a white shirt aggressively attacking another man by physically grappling with him and throwing him against a counter. This is a clear instance of physical violence, which meets the strict definition of anomalous activity as an immediate security threat. The behavior is not normal and requires immediate intervention.
+268|/home/gmonni54/agenticvad/data/ucf_crime/videos/Shoplifting021_x264.mp4|1|1|The frames depict a man in a purple shirt physically restraining and attacking a woman in a dark hoodie. The sequence shows escalating physical force, including the man grabbing and pushing the woman, which constitutes a clear act of physical violence. This meets the strict definition of anomalous activity as an immediate security threat.
+269|/home/gmonni54/agenticvad/data/ucf_crime/videos/Shoplifting022_x264.mp4|1|0|
+270|/home/gmonni54/agenticvad/data/ucf_crime/videos/Shoplifting027_x264.mp4|1|0|
+271|/home/gmonni54/agenticvad/data/ucf_crime/videos/Shoplifting028_x264.mp4|1|0|
+272|/home/gmonni54/agenticvad/data/ucf_crime/videos/Shoplifting029_x264.mp4|1|0|
+273|/home/gmonni54/agenticvad/data/ucf_crime/videos/Shoplifting031_x264.mp4|1|0|
+274|/home/gmonni54/agenticvad/data/ucf_crime/videos/Shoplifting033_x264.mp4|1|0|
+275|/home/gmonni54/agenticvad/data/ucf_crime/videos/Shoplifting034_x264.mp4|1|0|
+276|/home/gmonni54/agenticvad/data/ucf_crime/videos/Shoplifting037_x264.mp4|1|0|
+277|/home/gmonni54/agenticvad/data/ucf_crime/videos/Shoplifting039_x264.mp4|1|0|
+278|/home/gmonni54/agenticvad/data/ucf_crime/videos/Shoplifting044_x264.mp4|1|0|
+279|/home/gmonni54/agenticvad/data/ucf_crime/videos/Shoplifting049_x264.mp4|1|0|
+280|/home/gmonni54/agenticvad/data/ucf_crime/videos/Stealing019_x264.mp4|1|1|The frames show a title card indicating 'Watch: Attempted Car Theft at Local Student House 21 Oct 2014', which explicitly states a criminal incident. This is not a normal activity and constitutes a clear security threat as defined by the strict definition. The anomaly score is high because the event is pre-identified as a criminal act, which requires immediate security response.
+281|/home/gmonni54/agenticvad/data/ucf_crime/videos/Stealing036_x264.mp4|1|0|
+282|/home/gmonni54/agenticvad/data/ucf_crime/videos/Stealing058_x264.mp4|1|1|Multiple individuals are actively engaged in forcibly entering a vehicle by manipulating its doors and windows. This behavior is highly unusual and constitutes a clear security threat, as it involves unauthorized physical intrusion into a vehicle, which could indicate a robbery, theft, or other criminal activity. The actions are not normal daily activities and pose an immediate risk.
+283|/home/gmonni54/agenticvad/data/ucf_crime/videos/Stealing062_x264.mp4|1|0|
+284|/home/gmonni54/agenticvad/data/ucf_crime/videos/Stealing079_x264.mp4|1|0|
+285|/home/gmonni54/agenticvad/data/ucf_crime/videos/Vandalism007_x264.mp4|1|0|
+286|/home/gmonni54/agenticvad/data/ucf_crime/videos/Vandalism015_x264.mp4|1|0|
+287|/home/gmonni54/agenticvad/data/ucf_crime/videos/Vandalism017_x264.mp4|1|1|A person enters through a glass door, and in the subsequent frame, the glass shatters violently. This is a clear, immediate physical threat to the interior space and occupants, constituting a serious anomalous event under the strict definition provided.
+288|/home/gmonni54/agenticvad/data/ucf_crime/videos/Vandalism028_x264.mp4|1|0|
+289|/home/gmonni54/agenticvad/data/ucf_crime/videos/Vandalism036_x264.mp4|1|1|The frames show a store interior with significant damage: a large display rack is overturned and scattered across the floor, and the counter area is cluttered with debris. This indicates a violent disruption or forced entry, which is an immediate security threat. The scene is not consistent with normal daily activity and suggests a serious incident requiring immediate response.

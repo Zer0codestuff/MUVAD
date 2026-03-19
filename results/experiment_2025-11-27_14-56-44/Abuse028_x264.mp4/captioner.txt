@@ -1,0 +1,128 @@
+- frames: 0, 0.5, 1.0, 1.5, 2.0, 2.5
+FramesCount=6
+```json
+{
+  "anomaly_score": 0.0,
+  "description": "The video shows a person walking towards the gate and then running away. There is no clear evidence of physical violence, explosions, or other immediate threats. The activity appears to be normal movement, possibly a person leaving or entering the premises."
+}
+```
+- frames: 3.0, 3.5, 4.0, 4.5, 5.0, 5.5
+FramesCount=6
+```json
+{
+  "anomaly_score": 0.0,
+  "description": "The individual is seen walking towards and then through the gate. There is no indication of any unusual or threatening behavior. The activity appears to be normal daily movement."
+}
+```
+- frames: 6.0, 6.5, 7.0, 7.5, 8.0, 8.5
+FramesCount=6
+```json
+{
+  "anomaly_score": 0.0,
+  "description": "No anomalous activity is observed. The frames show a person standing near a gate, with no signs of violence, danger, or unusual behavior. The environment appears normal and safe."
+}
+```
+- frames: 9.0, 9.5, 10.0, 10.5, 11.0, 11.5
+FramesCount=6
+```json
+{
+  "anomaly_score": 0.0,
+  "description": "No clear anomalous activity is observed. The frames show a person walking near the gate and a dog on the ground. The environment appears normal with no signs of danger or unusual behavior."
+}
+```
+- frames: 12.0, 12.5, 13.0, 13.5, 14.0, 14.5
+FramesCount=6
+```json
+{
+  "anomaly_score": 0.7,
+  "description": "A person in a red shirt and hat is seen bending over and then standing up near a gate. The individual appears to be moving quickly and possibly interacting with the gate or something on it. The surroundings are relatively calm, with no other individuals or unusual objects visible."
+}
+```
+- frames: 15.0, 15.5, 16.0, 16.5, 17.0, 17.5
+FramesCount=6
+```json
+{
+    "anomaly_score": 0.0,
+    "description": "No anomalous activity is observed. The frames show a closed gate with no unusual movements or actions. The environment appears normal and safe."
+}
+```
+- frames: 18.0, 18.5, 19.0, 19.5, 20.0, 20.5
+FramesCount=6
+```json
+{
+    "anomaly_score": 0.7,
+    "description": "A person enters the frame from the bottom right corner and approaches the gate. The individual appears to be moving towards the gate, which is open, and seems to be interacting with the gate or the area around it. This behavior is unusual and could indicate an attempt to gain access or cause disruption."
+}
+```
+- frames: 21.0, 21.5, 22.0, 22.5, 23.0, 23.5
+FramesCount=6
+```json
+{
+  "anomaly_score": 0.0,
+  "description": "The individual is seen running towards the gate, then standing still and looking around. There is no clear evidence of immediate danger or unusual behavior."
+}
+```
+- frames: 24.0, 24.5, 25.0, 25.5, 26.0, 26.5
+FramesCount=6
+```json
+{
+  "anomaly_score": 0.0,
+  "description": "The individual is standing near a gate, looking outside. There is no significant movement or unusual behavior observed in the frames provided. The environment appears normal, with no signs of danger or immediate threat."
+}
+```
+- frames: 27.0, 27.5, 28.0, 28.5, 29.0, 29.5
+FramesCount=6
+```json
+{
+  "anomaly_score": 0.7,
+  "description": "The individual is seen attempting to open a gate. Initially, he stands and pushes the gate, then bends down and appears to be struggling with the gate's mechanism. This behavior suggests an unusual and potentially dangerous situation, as he is not engaging in normal daily activities."
+}
+```
+- frames: 30.0, 30.5, 31.0, 31.5, 32.0, 32.5
+FramesCount=6
+```json
+{
+    "anomaly_score": 0.0,
+    "description": "The individual is seen interacting with a gate, initially bending down and then standing up. The actions appear to be normal and routine, such as opening or closing the gate. There is no indication of any immediate security threat or unusual behavior."
+}
+```
+- frames: 33.0, 33.5, 34.0, 34.5, 35.0, 35.5
+FramesCount=6
+```json
+{
+  "anomaly_score": 0.0,
+  "description": "The individual is seen running towards the gate and then pushing it open. This action is a normal activity and does not indicate any immediate security threat or unusual behavior."
+}
+```
+- frames: 36.0, 36.5, 37.0, 37.5, 38.0, 38.5
+FramesCount=6
+```json
+{
+  "anomaly_score": 0.0,
+  "description": "No anomalous activity is observed. The frames show a static view of a gate with no movement or unusual behavior detected."
+}
+```
+- frames: 39.0, 39.5, 40.0, 40.5, 41.0, 41.5
+FramesCount=6
+```json
+{
+  "anomaly_score": 0.0,
+  "description": "No anomalous activity is observed. The frames show a static view of a gate with no movement or unusual behavior detected."
+}
+```
+- frames: 42.0, 42.5, 43.0, 43.5, 44.0, 44.5
+FramesCount=6
+```json
+{
+  "anomaly_score": 0.0,
+  "description": "No anomalous activity is observed. The frames show a static view of a gate and surrounding area, with no unusual or dangerous behavior detected."
+}
+```
+- frames: 45.0, 45.5, 46.0, 46.5, 47.0
+FramesCount=5
+```json
+{
+    "anomaly_score": 0.0,
+    "description": "No anomalous activity detected. The frames show a static view of a gate with no movement or unusual behavior observed."
+}
+```

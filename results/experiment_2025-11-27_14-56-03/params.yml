@@ -1,0 +1,102 @@
+evaluate:
+  videos_dir: ../../hdd-toshiba1/mchiesa/agenticvad/datasets/ucf_crime/videos
+  normal_video_indicator: Normal_Videos
+extractor:
+  video_url: /home/mchiesa/agenticvad/datasets/ucf_crime/videos/Explosion017_x264.mp4
+  timeout: 0.01
+  resize:
+  - 224
+  - 224
+  save_dir: ''
+  log: INFO
+selector:
+  batch_size: 15
+  save_dir: ''
+  log: INFO
+captioner:
+  model_name: lmstudio-community/InternVL3_5-2B-GGUF:Q8_0
+  prompt: ' You are a highly trained security analyst, reviewing footage from a surveillance
+    camera. You will receive a sequence of frame from a video. Your task is to determine
+    whether there is a clear and serious anomalous activity in the video that would
+    require an immediate security response.
+
+
+    Strict Definition of Anomalous Activity:
+
+    An activity is considered anomalous only if it is an immediate security threat
+    or highly unusual in a dangerous way. This includes but is not limited to physical
+    violence, explosions or fires, severe accidents or injuries, threatening or dangerous
+    behavior.
+
+    Do NOT consider as anomalies normal daily activities (e.g., sitting, talking,
+    walking, opening doors) unless there is clear evidence of danger.
+
+
+    Your response format:
+
+    - Short Summary: Describe what happens in the frames concisely.
+
+    - Anomaly Assessment; Clearly state whether the activity is truly an anomaly based
+    on the strict definition above.
+
+    - Anomaly Score: Assign a value from 0 (completely normal) to 1 (clearly dangerous);
+    only assign above 0.5 if the event is truly alarming.
+
+    - JSON object:
+
+    ```json
+
+    {
+
+    "anomaly_score": <value between 0 and 1>,
+
+    "description": "<your justification>"
+
+    }
+
+    ```
+
+
+    Here are the frames you have to analyze:
+
+    <frames> '
+  batch_size: 6
+  warmup_timeout: 20
+  random_seed: 1337
+  aggregate: true
+  aggregate_frames_tag: FramesCount
+  aggregate_timestamp_joiner: ', '
+  parameters:
+    max_tokens: 512
+    temperature: 0.0
+    top_p: 0.0
+    cont_batching: true
+    ngl: 999
+    ctx_len: 81920
+    batch: 8192
+    ubatch: 2048
+    np: 10
+  device: cuda:0
+  backend: llamacpp
+  host: localhost:8080
+  save_file: /home/gmonni54/agenticvad/results/responses.tmp
+  log: INFO
+detector:
+  model_name: null
+  prompt: ''
+  batch_size: 1
+  parameters: {}
+  device: cuda:0
+  backend: ollama
+  host: localhost:11111
+  save_file: /home/gmonni54/agenticvad/results/responses.tmp
+  log: INFO
+notifier:
+  threshold: 0.5
+  result_key: anomaly_score
+  description_key: description
+  decision_mode: moving_average
+  avg_window_size: 1
+  consecutive_required: 1
+  log: INFO
+log: INFO

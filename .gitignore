@@ -1,0 +1,13 @@
+**/__pycache__/
+
+datasets/
+test/
+*.log
+*.tmp
+predictions_*
+nohup.out
+*.out
+assets/videos_and_frames/
+results/gradio_runs/
+tmp/
+data/

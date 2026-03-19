@@ -1,0 +1,291 @@
+id|video_path|ground_true|label_prediction|description
+0|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Abuse028_x264.mp4|1|0|
+1|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Abuse030_x264.mp4|1|0|
+2|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Arrest001_x264.mp4|1|0|
+3|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Arrest007_x264.mp4|1|1|The person's hurried movement towards the door suggests urgency or fear, which could indicate a security threat. However, without additional context or evidence of violence, it is not definitively clear that the situation is dangerous.
+4|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Arrest024_x264.mp4|1|1|The presence of individuals in tactical gear and the open doors of the van suggest a high level of concern. The individuals' positioning and the fact that they are on the sidewalk, potentially engaging with the van, indicate that this is not a normal situation.
+5|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Arrest030_x264.mp4|1|1|The standing individual's defensive posture and the prone position of the other person suggest a potential threat or danger. The standing individual appears to be reacting to a perceived threat, and the prone position of the other person could indicate they have been attacked or are in distress.
+6|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Arrest039_x264.mp4|1|1|The person is exhibiting behavior that suggests a potential security threat, possibly due to the urgency in their movement and the object they are holding.
+7|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Arson007_x264.mp4|1|0|
+8|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Arson009_x264.mp4|1|1|The individual's cautious and deliberate movements towards the van, combined with the potential weapon or tool in their hand, suggest a high likelihood of a dangerous situation. The hooded jacket adds to the anonymity and potential threat.
+9|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Arson010_x264.mp4|1|1|The person running away from the van could indicate a potential threat or danger. The presence of a second person observing the situation suggests that the event is being monitored or is of interest.
+10|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Arson011_x264.mp4|1|1|The person in the elevator is holding a weapon, and the individual in the foreground is pointing a camera or device at them, indicating a serious and dangerous situation.
+11|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Arson016_x264.mp4|1|1|The person's posture and grip on the seat suggest a potential emergency situation that requires immediate attention.
+12|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Arson018_x264.mp4|1|1|The vehicle is kicking up a significant amount of smoke or dust, which is not typical for normal driving and suggests a possible accident or dangerous situation.
+13|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Arson022_x264.mp4|1|0|
+14|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Arson035_x264.mp4|1|1|A vehicle is driving past parked cars at a high speed, which could be a dangerous situation.
+15|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Arson041_x264.mp4|1|1|The individual entering the building alone and quickly, wearing a hooded sweatshirt, and carrying something in their hands, suggests a potential security threat.
+16|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Assault006_x264.mp4|1|1|The person is riding a scooter or motorcycle indoors at a high speed, which is not a typical or safe behavior and poses a potential safety hazard.
+17|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Assault010_x264.mp4|1|1|Inmate lying on bed in distress, potentially indicating a medical emergency or self-harm risk.
+18|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Assault011_x264.mp4|1|1|One person is running towards a group of people near a motorcycle parking area, which could be interpreted as a potential threat or dangerous behavior.
+19|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Burglary005_x264.mp4|1|1|The individual holding what appears to be a weapon is walking towards the building, which could be an immediate security threat.
+20|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Burglary017_x264.mp4|1|1|The person lying on the desk in a state of distress or unconsciousness is an anomaly as it is not a normal occurrence in a hotel room setting.
+21|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Burglary018_x264.mp4|1|1|The person is wearing a mask and carrying a bag, which could indicate potential threatening or dangerous behavior.
+22|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Burglary021_x264.mp4|1|0|
+23|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Burglary024_x264.mp4|1|1|The person is in a compromising position at the desk, exposing their upper body, which is considered inappropriate behavior and a breach of workplace conduct.
+24|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Burglary032_x264.mp4|1|1|The person in a white outfit is moving quickly through the office space, which is unusual and could indicate a potential security threat or dangerous behavior.
+25|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Burglary033_x264.mp4|1|0|
+26|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Burglary035_x264.mp4|1|1|The individual is holding a weapon-like object and appears to be in a threatening position, indicating a high risk of imminent danger.
+27|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Burglary037_x264.mp4|1|1|The presence of a person in a suit in a medical setting is unusual and could indicate a security threat or an emergency situation.
+28|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Burglary061_x264.mp4|1|1|The individual is leaning over the counter in an unusual manner, which is not typical for a routine transaction or interaction in this setting. This behavior could indicate a potential threat or suspicious activity.
+29|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Burglary076_x264.mp4|1|1|A person is running away from a parked car, which could indicate a potential threat or dangerous situation.
+30|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Burglary079_x264.mp4|1|1|The person is bending over near a parked car, possibly attempting to steal something, which is an immediate security threat.
+31|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Burglary092_x264.mp4|1|0|
+32|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Explosion002_x264.mp4|1|1|The person is touching the car while using the phone, which is a dangerous behavior that could lead to accidents or other unsafe situations.
+33|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Explosion004_x264.mp4|1|1|The frames show a fire scene with smoke and flames, indicating a serious safety threat.
+34|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Explosion007_x264.mp4|1|1|The vehicle appears to be in motion with significant smoke or dust, suggesting a possible accident or dangerous driving situation.
+35|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Explosion008_x264.mp4|1|1|The final frame shows a large explosion with thick smoke, indicating an immediate and serious threat.
+36|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Explosion010_x264.mp4|1|1|The presence of dense smoke in a forested area is highly unusual and dangerous, indicating a serious incident such as a forest fire or explosion.
+37|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Explosion011_x264.mp4|1|1|Smoke coming out of the rear of a bus indicates a potential fire or explosion, posing an immediate security threat.
+38|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Explosion013_x264.mp4|1|1|The presence of a fire poses an immediate security threat. The person is not in immediate danger but is moving towards the fire.
+39|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Explosion016_x264.mp4|1|1|Smoke coming from the top of the building indicates a potential fire or explosion, which is an immediate security threat.
+40|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Explosion017_x264.mp4|1|1|Fire in a gas station area with multiple individuals present, some attempting to extinguish the fire, indicating an immediate and serious security threat.
+41|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Explosion020_x264.mp4|1|1|The presence of a sparkler or flammable object near a parked car poses a potential fire hazard. The situation is tense, with people gathered around the car, but it does not immediately require an alarm due to the lack of physical violence or severe danger.
+42|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Explosion021_x264.mp4|1|1|A large fire erupts from one of the fuel pumps, posing an immediate security threat.
+43|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Explosion022_x264.mp4|1|1|The open door in the room is an anomaly as it is not a normal state for this type of room, which usually requires doors to be closed for security and safety reasons.
+44|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Explosion025_x264.mp4|1|1|The presence of smoke or dark cloud indicates a potential fire or dangerous event, which is a clear security threat.
+45|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Explosion027_x264.mp4|1|0|
+46|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Explosion028_x264.mp4|1|0|
+47|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Explosion029_x264.mp4|1|1|The fire near the car at the gas station is a serious safety hazard and poses an immediate threat. The fire could lead to an explosion or further danger if not addressed promptly.
+48|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Explosion033_x264.mp4|1|1|The frames show a large, bright orange and yellow area that appears to be a fire or explosion, with smoke and possibly flames. The intensity of the light and the color suggest a significant and immediate danger.
+49|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Explosion035_x264.mp4|1|1|The footage shows a chaotic scene with papers flying and individuals in apparent distress, indicating a serious and dangerous situation.
+50|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Explosion036_x264.mp4|1|1|The person on the ground appears to be in distress or possibly injured, which is a clear and serious anomaly based on the strict definition provided.
+51|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Explosion039_x264.mp4|1|0|
+52|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Explosion043_x264.mp4|1|1|The central figure's aggressive posture and the attention of surrounding individuals indicate an immediate security threat.
+53|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Fighting003_x264.mp4|1|1|A person is holding a weapon pointed at another individual, indicating a serious and immediate security threat.
+54|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Fighting018_x264.mp4|1|1|The person lying on the ground suggests a potential injury or dangerous situation, warranting immediate security response.
+55|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Fighting033_x264.mp4|1|1|The presence of a weapon in the tunnel is a clear and serious anomaly that requires immediate security response.
+56|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Fighting042_x264.mp4|1|1|The individual is holding a weapon and pointing it towards another person, indicating a potential threat or confrontation.
+57|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Fighting047_x264.mp4|1|1|The individuals' body language suggests a potential confrontation or altercation. The person in the defensive posture could be perceived as a threat, especially if they are holding something or have an aggressive stance.
+58|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_003_x264.mp4|0|0|
+59|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_006_x264.mp4|0|0|
+60|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_010_x264.mp4|0|0|
+61|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_014_x264.mp4|0|0|
+62|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_015_x264.mp4|0|0|
+63|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_018_x264.mp4|0|0|
+64|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_019_x264.mp4|0|1|The customer wearing a bright orange vest is standing near the counter, which may indicate suspicious behavior. The security guard is monitoring the situation, but the customer's proximity to the counter and their attire suggest a potential anomaly.
+65|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_024_x264.mp4|0|0|
+66|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_025_x264.mp4|0|0|
+67|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_027_x264.mp4|0|1|The presence of a weapon near a security checkpoint is a clear and serious anomaly, constituting an immediate security threat.
+68|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_033_x264.mp4|0|0|
+69|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_034_x264.mp4|0|0|
+70|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_041_x264.mp4|0|0|
+71|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_042_x264.mp4|0|0|
+72|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_048_x264.mp4|0|1|The person reaching out towards the seated individual could be interpreted as threatening or dangerous behavior, which aligns with the criteria for an anomaly.
+73|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_050_x264.mp4|0|0|
+74|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_051_x264.mp4|0|0|
+75|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_056_x264.mp4|0|0|
+76|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_059_x264.mp4|0|0|
+77|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_063_x264.mp4|0|0|
+78|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_067_x264.mp4|0|0|
+79|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_070_x264.mp4|0|0|
+80|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_100_x264.mp4|0|0|
+81|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_129_x264.mp4|0|0|
+82|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_150_x264.mp4|0|1|The running individual's behavior is unusual and could be interpreted as a threat or dangerous activity.
+83|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_168_x264.mp4|0|0|
+84|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_175_x264.mp4|0|1|The presence of a weapon and the tense atmosphere suggest a potential security threat.
+85|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_182_x264.mp4|0|1|The person at the counter appears to be engaging in suspicious behavior, such as reaching into a bag or box, which could indicate a potential threat or dangerous activity.
+86|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_189_x264.mp4|0|0|
+87|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_196_x264.mp4|0|0|
+88|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_203_x264.mp4|0|0|
+89|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_210_x264.mp4|0|0|
+90|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_217_x264.mp4|0|1|The person near the gas pump is standing in a confrontational stance, which could be interpreted as threatening or dangerous behavior.
+91|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_224_x264.mp4|0|1|A person is sitting at a desk with their head down, appearing to be in distress or possibly unconscious. Another person is standing nearby, seemingly concerned or trying to assist. This behavior is highly unusual in a professional setting and could indicate a serious health issue or a dangerous situation.
+92|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_246_x264.mp4|0|1|The person is holding a firearm in a setting that does not typically involve such items, posing an immediate security threat.
+93|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_247_x264.mp4|0|0|
+94|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_248_x264.mp4|0|0|
+95|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_251_x264.mp4|0|0|
+96|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_289_x264.mp4|0|0|
+97|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_310_x264.mp4|0|0|
+98|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_312_x264.mp4|0|0|
+99|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_317_x264.mp4|0|0|
+100|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_345_x264.mp4|0|0|
+101|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_352_x264.mp4|0|1|The person near the green car appears to be holding something that could be a weapon and is in a confrontational stance with another individual near the blue car, indicating a potential threat.
+102|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_360_x264.mp4|0|1|The man behind the counter is holding a weapon, and the other individual appears to be approaching the counter, indicating a potential threat or confrontation.
+103|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_365_x264.mp4|0|1|The person on the floor is in a distressed or aggressive posture, which is considered an immediate security threat.
+104|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_401_x264.mp4|0|0|
+105|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_417_x264.mp4|0|0|
+106|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_439_x264.mp4|0|1|The presence of a large object that could be a weapon, combined with the tense atmosphere and unusual behavior of the group, suggests that this is an anomaly that requires immediate security attention.
+107|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_452_x264.mp4|0|0|
+108|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_453_x264.mp4|0|1|A person outside the store is holding a large object, possibly a weapon, and appears to be threatening someone inside the store.
+109|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_478_x264.mp4|0|1|The white car is moving quickly and erratically, which could indicate aggressive driving or a potential accident.
+110|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_576_x264.mp4|0|0|
+111|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_597_x264.mp4|0|0|
+112|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_603_x264.mp4|0|1|The person is holding a weapon and pointing it at someone inside the car, which is a highly unusual and dangerous behavior.
+113|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_606_x264.mp4|0|1|A person is carrying a weapon and approaching a parked car, which is considered an immediate security threat.
+114|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_621_x264.mp4|0|1|The person near the gas pump appears to be in distress or possibly injured, which constitutes an immediate security threat.
+115|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_634_x264.mp4|0|0|
+116|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_641_x264.mp4|0|0|
+117|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_656_x264.mp4|0|1|A white SUV is parked in the middle of the street, blocking traffic and posing a risk to both drivers and pedestrians.
+118|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_686_x264.mp4|0|0|
+119|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_696_x264.mp4|0|1|The motorcyclist in the orange jacket riding in the middle of the road is an anomaly based on the strict definition of anomalous activity. This behavior is highly unusual and dangerous, as it puts the rider and others at risk of accidents.
+120|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_702_x264.mp4|0|1|The presence of a handgun and threatening behavior by one individual towards another person in the produce section of a grocery store constitutes an immediate security threat.
+121|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_704_x264.mp4|0|0|
+122|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_710_x264.mp4|0|0|
+123|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_717_x264.mp4|0|0|
+124|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_722_x264.mp4|0|1|A person is sitting on the floor in an office environment, which is not a typical behavior and could indicate a safety issue or a serious situation.
+125|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_725_x264.mp4|0|0|
+126|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_745_x264.mp4|0|0|
+127|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_758_x264.mp4|0|0|
+128|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_778_x264.mp4|0|0|
+129|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_780_x264.mp4|0|0|
+130|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_781_x264.mp4|0|0|
+131|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_782_x264.mp4|0|0|
+132|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_783_x264.mp4|0|1|One person in a red shirt appears to be in distress or discomfort near the elevator, which could indicate a potential safety issue or emergency situation.
+133|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_798_x264.mp4|0|0|
+134|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_801_x264.mp4|0|0|
+135|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_828_x264.mp4|0|0|
+136|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_831_x264.mp4|0|0|
+137|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_866_x264.mp4|0|0|
+138|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_867_x264.mp4|0|0|
+139|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_868_x264.mp4|0|1|The presence of a weapon and the tense atmosphere suggest that this could be an immediate security threat.
+140|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_869_x264.mp4|0|0|
+141|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_870_x264.mp4|0|0|
+142|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_871_x264.mp4|0|1|The standing person's posture and arm position suggest potential physical violence, which is a clear and serious anomaly.
+143|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_872_x264.mp4|0|0|
+144|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_873_x264.mp4|0|1|The crouched individual near the pallet is an anomaly as it deviates from normal warehouse activities and could indicate a potential threat.
+145|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_874_x264.mp4|0|1|A person is holding a large object and pointing it towards another individual at the checkout counter, indicating threatening behavior.
+146|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_875_x264.mp4|0|0|
+147|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_876_x264.mp4|0|0|
+148|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_877_x264.mp4|0|1|The person is carrying a large object that could be potentially dangerous, indicating a possible security threat.
+149|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_878_x264.mp4|0|0|
+150|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_879_x264.mp4|0|0|
+151|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_880_x264.mp4|0|0|
+152|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_881_x264.mp4|0|0|
+153|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_882_x264.mp4|0|0|
+154|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_883_x264.mp4|0|0|
+155|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_884_x264.mp4|0|1|The person entering the store is holding a weapon and pointing it towards another individual, indicating an immediate security threat.
+156|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_885_x264.mp4|0|0|
+157|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_886_x264.mp4|0|0|
+158|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_887_x264.mp4|0|0|
+159|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_888_x264.mp4|0|1|A woman is holding a handgun pointed at the cashier, which is a clear and serious anomaly. This is an immediate security threat and highly unusual in a dangerous way.
+160|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_889_x264.mp4|0|0|
+161|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_890_x264.mp4|0|0|
+162|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_891_x264.mp4|0|0|
+163|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_892_x264.mp4|0|0|
+164|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_893_x264.mp4|0|0|
+165|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_894_x264.mp4|0|1|The woman is holding a strap across her chest, which could be a gun, and the man behind the counter is looking at her, indicating a potential security threat.
+166|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_895_x264.mp4|0|0|
+167|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_896_x264.mp4|0|0|
+168|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_897_x264.mp4|0|1|The person near the bar appears to be acting strangely, which could indicate a potential threat or dangerous behavior.
+169|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_898_x264.mp4|0|0|
+170|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_899_x264.mp4|0|0|
+171|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_900_x264.mp4|0|0|
+172|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_901_x264.mp4|0|1|The shadow of a person or object moving quickly on the road could be a potential threat, but more context is needed to confirm.
+173|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_902_x264.mp4|0|1|The open back door of the garbage truck and the car's proximity to it could potentially lead to an accident if the truck driver or the car driver does not react quickly.
+174|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_903_x264.mp4|0|0|
+175|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_904_x264.mp4|0|0|
+176|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_905_x264.mp4|0|0|
+177|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_906_x264.mp4|0|0|
+178|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_907_x264.mp4|0|0|
+179|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_908_x264.mp4|0|0|
+180|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_909_x264.mp4|0|0|
+181|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_910_x264.mp4|0|0|
+182|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_911_x264.mp4|0|0|
+183|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_912_x264.mp4|0|0|
+184|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_913_x264.mp4|0|0|
+185|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_914_x264.mp4|0|0|
+186|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_915_x264.mp4|0|1|The red car is making a sudden and aggressive turn into the crosswalk at a high speed, posing a significant threat to pedestrian safety.
+187|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_923_x264.mp4|0|0|
+188|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_924_x264.mp4|0|1|The person on the floor is in a defensive posture, indicating a potential physical altercation or threat.
+189|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_925_x264.mp4|0|1|The car parked in a way that blocks the entrance to the parking lot is an anomaly based on the strict definition of anomalous activity. This could potentially cause a security threat or dangerous situation if the car is blocking emergency exits or access points.
+190|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_926_x264.mp4|0|0|
+191|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_927_x264.mp4|0|1|The passenger is sitting in a way that could obstruct the driver's view or potentially cause a distraction, which could pose a risk to the driver's ability to operate the vehicle safely.
+192|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_928_x264.mp4|0|1|The woman is smoking a cigarette, which is not typically allowed in retail environments, posing a potential health and safety risk.
+193|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_929_x264.mp4|0|0|
+194|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_930_x264.mp4|0|0|
+195|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_931_x264.mp4|0|0|
+196|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_932_x264.mp4|0|1|A person is holding a weapon near the entrance of the store, which is a clear and immediate security threat.
+197|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_933_x264.mp4|0|0|
+198|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_934_x264.mp4|0|0|
+199|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_935_x264.mp4|0|1|A person is holding a weapon and pointing it towards another individual, indicating a clear and serious security threat.
+200|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_936_x264.mp4|0|0|
+201|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_937_x264.mp4|0|0|
+202|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_938_x264.mp4|0|0|
+203|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_939_x264.mp4|0|0|
+204|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_940_x264.mp4|0|1|The person's rapid and erratic movements suggest a potential threat or dangerous behavior, as they appear to be trying to quickly exit the store or hide.
+205|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_941_x264.mp4|0|1|The yellow car is blocking the entrance to the parking lot, which could cause a security threat or hinder emergency access.
+206|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_943_x264.mp4|0|0|
+207|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Normal_Videos_944_x264.mp4|0|1|The individual appears to be in a state of distress or agitation, which suggests a potential threat or dangerous situation.
+208|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/RoadAccidents001_x264.mp4|1|1|The person is climbing over a fence, which is an unusual and potentially dangerous activity, especially at night.
+209|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/RoadAccidents002_x264.mp4|1|1|The bus crashing into pedestrians is a clear and serious anomaly, involving immediate physical violence and danger to the people present.
+210|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/RoadAccidents004_x264.mp4|1|1|A car has collided with another vehicle at an intersection, causing a significant impact and scattering debris. This is a clear and serious anomaly that poses an immediate threat to safety.
+211|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/RoadAccidents009_x264.mp4|1|0|
+212|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/RoadAccidents010_x264.mp4|1|0|
+213|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/RoadAccidents011_x264.mp4|1|1|A person in a red shirt is riding a motorcycle in the middle of the road, which is not a common sight in this type of traffic.
+214|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/RoadAccidents012_x264.mp4|1|1|The pedestrian crossing the street in front of the vehicle is an immediate security threat as it poses a risk of collision with the moving car.
+215|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/RoadAccidents016_x264.mp4|1|1|The car emitting smoke suggests a potential mechanical issue or accident, posing a danger to the people nearby.
+216|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/RoadAccidents017_x264.mp4|1|1|The collision between two vehicles at an intersection is a dangerous situation that requires immediate attention.
+217|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/RoadAccidents019_x264.mp4|1|1|The physical altercation between individuals on motorcycles is an immediate security threat, involving potential physical violence.
+218|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/RoadAccidents020_x264.mp4|1|1|A person on a motorcycle is lying on the road, indicating a possible accident or emergency situation.
+219|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/RoadAccidents021_x264.mp4|1|0|
+220|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/RoadAccidents022_x264.mp4|1|1|The frames depict a traffic accident at a crosswalk involving a black car and a motorcycle, with multiple individuals on the ground, some appearing injured. Emergency responders are present, indicating an immediate security threat.
+221|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/RoadAccidents121_x264.mp4|1|1|The overturned car and debris indicate a serious accident. The approaching white car may pose a risk if it does not stop or slow down.
+222|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/RoadAccidents122_x264.mp4|1|0|
+223|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/RoadAccidents123_x264.mp4|1|1|A vehicle has collided with a pedestrian at a crosswalk, posing an immediate physical violence threat.
+224|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/RoadAccidents124_x264.mp4|1|1|A person is sitting on the ground near a pole, appearing to be in distress or unconscious, with debris scattered on the road. This situation is not normal and requires immediate security response.
+225|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/RoadAccidents125_x264.mp4|1|1|The car has crashed into a barrier, causing smoke and debris. This is a serious event that requires immediate attention.
+226|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/RoadAccidents127_x264.mp4|1|1|The truck is driving through a pedestrian crossing, which is not a common or safe practice. This could potentially cause harm to pedestrians if the truck were to stop suddenly or if the driver were to lose control.
+227|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/RoadAccidents128_x264.mp4|1|1|A person is running away from a white car, which could indicate a potential threat or dangerous situation.
+228|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/RoadAccidents131_x264.mp4|1|1|The car is swerving and there is a plume of smoke or dust, indicating a potential accident or collision.
+229|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/RoadAccidents132_x264.mp4|1|1|The white van is making a sudden and sharp turn into the crosswalk, posing an immediate safety hazard to pedestrians.
+230|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/RoadAccidents133_x264.mp4|1|1|A motorcycle rider has fallen off the bike, causing a small fire. A second motorcycle rider is nearby, possibly attempting to help.
+231|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Robbery048_x264.mp4|1|1|The person entering the store is holding what appears to be a weapon, which is a serious security threat.
+232|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Robbery050_x264.mp4|1|0|
+233|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Robbery102_x264.mp4|1|1|The footage shows a man and a woman in a heated altercation outside a car. The woman appears to be aggressively pushing the man, who is falling backwards. This behavior is highly unusual and dangerous, indicating a potential physical altercation that requires immediate security response.
+234|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Robbery106_x264.mp4|1|1|The man on the motorcycle is pointing a gun at another man, which is a serious security threat.
+235|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Robbery137_x264.mp4|1|1|The individual is wearing a mask and gloves while placing an item on the checkout scanner, which is suspicious behavior and could indicate an attempt to conceal their identity or engage in theft or fraud.
+236|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Shooting002_x264.mp4|1|1|One person is holding another in a restraining manner, suggesting potential physical violence or assault.
+237|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Shooting004_x264.mp4|1|1|The person near the car appears to be holding a weapon, indicating a potential security threat.
+238|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Shooting007_x264.mp4|1|0|
+239|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Shooting008_x264.mp4|1|1|One individual appears to be in a defensive or aggressive posture, which could indicate a potential security threat.
+240|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Shooting010_x264.mp4|1|0|
+241|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Shooting011_x264.mp4|1|1|The person in the black hoodie and mask is entering a room and moving quickly towards another individual, which is highly unusual and dangerous behavior.
+242|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Shooting013_x264.mp4|1|1|The individual is carrying a firearm, which is a clear and serious anomaly. The potential threat to safety is high, warranting immediate security response.
+243|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Shooting015_x264.mp4|1|0|
+244|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Shooting018_x264.mp4|1|1|The man holding a gun and pointing it towards another person lying on the floor is exhibiting dangerous behavior, posing a serious threat to safety.
+245|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Shooting019_x264.mp4|1|1|The presence of a weapon and the tense atmosphere suggest a potential imminent threat or dangerous situation.
+246|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Shooting021_x264.mp4|1|1|The individual is wearing a mask and gloves, and is holding a weapon, indicating a high likelihood of dangerous behavior.
+247|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Shooting022_x264.mp4|1|1|The individual in the red shirt is standing and leaning forward in a potentially confrontational manner, which could be interpreted as a threat or disturbance.
+248|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Shooting024_x264.mp4|1|1|The person riding a motorcycle on the sidewalk is not following traffic rules and could pose a risk to pedestrians.
+249|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Shooting026_x264.mp4|1|1|The erratic and rapid movement of an object or person across the frame creates streaks of light, indicating a high likelihood of dangerous or highly unusual activity.
+250|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Shooting028_x264.mp4|1|1|The individual is carrying a large object that appears to be a weapon, moving quickly towards the counter area with a sense of urgency or aggression, which is highly unusual and dangerous in the context of the environment.
+251|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Shooting032_x264.mp4|1|1|A person in a green uniform carrying an object that could be a weapon is approaching a building, which is an immediate security threat.
+252|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Shooting033_x264.mp4|1|1|The falling person is an immediate security threat, and the presence of another individual who may be trying to assist adds to the urgency of the situation.
+253|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Shooting034_x264.mp4|1|0|
+254|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Shooting037_x264.mp4|1|0|
+255|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Shooting043_x264.mp4|1|1|The SUV is driving on a sidewalk, which is not a typical or safe location for a vehicle. This behavior poses a risk to pedestrians and could lead to an accident.
+256|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Shooting046_x264.mp4|1|1|The text indicates a serious security threat, describing a police raid and hostage situation, which is a clear and dangerous anomaly.
+257|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Shooting047_x264.mp4|1|1|The presence of a weapon and a tense interaction between individuals indicate a potential threat or dangerous situation.
+258|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Shooting048_x264.mp4|1|1|The standing person's aggressive posture and proximity to the seated individual suggest a potential threat, warranting immediate security attention.
+259|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Shoplifting001_x264.mp4|1|1|The individual is carrying a large, dark object that resembles a gun, which is highly unusual and dangerous in a store setting. This behavior poses a clear and serious threat to the safety of the store's employees and customers.
+260|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Shoplifting004_x264.mp4|1|1|The standing individual is pointing at the seated person, which could be a threatening or dangerous behavior.
+261|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Shoplifting005_x264.mp4|1|0|
+262|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Shoplifting007_x264.mp4|1|1|The seated person's defensive posture and the attention of the other individuals suggest an immediate security threat. The person reaching out could be attempting to intervene or assist, indicating a potential altercation or conflict.
+263|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Shoplifting010_x264.mp4|1|1|The individual in the yellow shirt is reaching into a shelf, which is a suspicious action that could indicate theft.
+264|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Shoplifting015_x264.mp4|1|1|One individual appears to be in a confrontational stance towards another person, indicating a potential threat or dangerous behavior.
+265|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Shoplifting016_x264.mp4|1|0|
+266|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Shoplifting017_x264.mp4|1|1|The person in red is standing behind the counter in a confrontational stance, reaching for something on the counter, which could be a potential threat.
+267|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Shoplifting020_x264.mp4|1|1|The individual is holding a large, pink object that resembles a weapon, which is an immediate security threat.
+268|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Shoplifting021_x264.mp4|1|1|The individual in the purple jacket appears to be reaching into the drawer of the cash register with a hand that is not clearly visible, which could indicate an attempt to steal or tamper with the register. The person in the dark hoodie is standing close by, seemingly observing the action, which could suggest complicity or concern. The situation is suspicious and requires immediate attention to prevent potential theft or other criminal activity.
+269|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Shoplifting022_x264.mp4|1|0|
+270|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Shoplifting027_x264.mp4|1|0|
+271|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Shoplifting028_x264.mp4|1|0|
+272|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Shoplifting029_x264.mp4|1|0|
+273|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Shoplifting031_x264.mp4|1|0|
+274|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Shoplifting033_x264.mp4|1|0|
+275|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Shoplifting034_x264.mp4|1|1|The standing individual's posture and proximity to the customer suggest a potential threat. The customer's body language indicates they may be in a defensive or submissive position.
+276|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Shoplifting037_x264.mp4|1|1|The man at the table is in a defensive posture with raised hands, and the person standing nearby appears confrontational, indicating a potentially threatening situation.
+277|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Shoplifting039_x264.mp4|1|0|
+278|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Shoplifting044_x264.mp4|1|1|The man is holding a gun and pointing it towards the camera, which is an immediate security threat and highly unusual in a retail environment.
+279|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Shoplifting049_x264.mp4|1|0|
+280|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Stealing019_x264.mp4|1|1|The man's posture and the potential weapon in his hand indicate a high level of danger and potential threat to safety.
+281|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Stealing036_x264.mp4|1|0|
+282|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Stealing058_x264.mp4|1|1|The individuals are wearing hoodies and masks, and one person is holding what appears to be a weapon, indicating a potential threat or criminal activity.
+283|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Stealing062_x264.mp4|1|0|
+284|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Stealing079_x264.mp4|1|1|The individual is attempting to force open a secured gate, which is a clear security threat.
+285|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Vandalism007_x264.mp4|1|0|
+286|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Vandalism015_x264.mp4|1|0|
+287|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Vandalism017_x264.mp4|1|1|The shattered glass window at the store's entrance is a clear and serious anomaly, indicating an immediate security threat.
+288|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Vandalism028_x264.mp4|1|0|
+289|/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Vandalism036_x264.mp4|1|0|

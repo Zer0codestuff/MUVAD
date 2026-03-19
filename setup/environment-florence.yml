@@ -1,0 +1,29 @@
+name: florence
+dependencies:
+    # Python
+    - python=3.12
+    - pip
+    - pip:
+
+        # Configuration
+        - PyYAML
+
+        # Medias
+        - pillow
+        - opencv-python
+
+        # Evaluate
+        - scikit-learn
+
+        # Hugging face
+        - torch
+        - transformers
+        - accelerate
+        - bitsandbytes
+
+        # Ollama
+        - ollama
+
+        # Florence-2
+        - timm
+        - einops

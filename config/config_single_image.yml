@@ -1,0 +1,79 @@
+evaluate:
+    videos_dir: "/home/mchiesa/agenticvad/datasets/ucf_crime/videos"
+    normal_video_indicator: "Normal_Videos"
+
+extractor:
+    video_url: "/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Explosion017_x264.mp4"
+    timeout: 0.01
+    resize: [224, 224]
+    save_dir: ""
+    log: "INFO"
+
+selector:
+    batch_size: 15
+    save_dir: ""
+    log: "INFO"
+
+captioner:
+    model_name: "lmstudio-community/InternVL3_5-2B-GGUF:Q8_0"
+    prompt:
+        '
+        You are a highly trained security analyst reviewing frames from a surveillance video. You will receive one image (frame) attached to this request. Analyze it critically.
+
+        Strict Definition of Anomalous Activity:
+        An activity is anomalous only if it is an immediate security threat or highly unusual in a dangerous way (e.g., physical violence, explosions or fires, severe accidents or injuries,
+        threatening or dangerous behavior). Do NOT consider as anomalies normal daily activities.
+
+        Output (return exactly one JSON object and nothing else):
+        {
+          "description": "<detail description of the image and your anomaly assessment>"
+          "anomaly_score": <0..1>
+        }
+        Scoring: 0.00–0.10 normal; 0.11–0.30 slightly unusual; 0.31–0.50 potential risk/monitor; 0.51–0.70 immediate risk/harmful act; 0.71–1.00 severe ongoing threat (e.g., active violence, weapon in use, fire, any form of theft).
+        '
+        
+
+    batch_size: 20
+    warmup_timeout: 20
+    random_seed: 1337
+    parameters: 
+        # Forwarded to llama.cpp OpenAI API 
+        max_tokens: 512
+        temperature: 0.5
+        top_p: 0.9
+        cont_batching: true   # abilita --cont-batching
+        ngl: 999
+        ctx_len: 81920
+        batch: 8192
+        ubatch: 2048
+        flash_attn: true
+        np: 20
+    device: "cuda:0"
+    backend: llamacpp
+    host: localhost:8080
+    save_file: "/home/gmonni54/agenticvad/results/responses.tmp"
+    log: "INFO"
+
+detector:
+    model_name: null
+    prompt: ''
+    batch_size: 1
+    parameters: {}
+    device: "cuda:0"
+    backend: ollama  # options: ollama | llamacpp
+    host: localhost:11111
+    save_file: "/home/gmonni54/agenticvad/results/responses.tmp"
+    log: "INFO"
+
+notifier:
+    threshold: 0.5
+    result_key: "anomaly_score"
+    description_key: "description"
+    decision_mode: "moving_average"   # oppure "consecutive"
+    avg_window_size: 3                # usato solo in moving_average
+    consecutive_required: 3           # usato solo in consecutive
+    log: "INFO"
+
+log: "INFO"
+
+

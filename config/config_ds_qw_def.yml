@@ -1,0 +1,93 @@
+extractor:
+    videos_dir: "/home/mchiesa/agenticvad/datasets/ucf_crime/videos/"
+    video_url: "/home/mchiesa/agenticvad/datasets/ucf_crime/videos/Explosion017_x264.mp4"
+    timeout: 0.01
+    save_dir: ""
+    log: "INFO"
+
+selector:
+    batch_size: 15
+    save_dir: ""
+    log: "INFO"
+
+captioner:
+    model_name: "deepseek-ai/deepseek-vl2-tiny"
+    prompt: 
+        '
+        Describe what is happening in this image, focusing on the subjects and their behaviors and actions.
+        '
+    batch_size: 1
+    parameters:
+        dtype: "bfloat16"
+        max_new_tokens: 1024
+        early_stopping: true
+        repetition_penalty: 1.5
+        do_sample: false # Minimum temperature
+        num_beams: 3
+    device: "cuda:0"
+    save_file: "~/agenticvad/results/captioner.tmp"
+    log: "INFO"
+
+detector:
+    model_name: "qwen2.5:3b"
+    prompt:
+        '
+        You are a highly trained security analyst, reviewing footage from a surveillance camera.
+        You will receive a sequence of frame descriptions with timestamps.
+        Your task is to determine whether there is a clear and serious anomalous activity in the video that would require an immediate security response.
+
+
+        Strict Definition of Anomalous Activity:
+
+        An activity is considered anomalous only if it is an immediate security threat or highly unusual in a dangerous way.
+        This includes but is not limited to physical violence, explosions or fires, severe accidents or injuries, threatening or dangerous behavior.
+        
+        Do NOT consider as anomalies normal daily activities (e.g., sitting, talking, walking, opening doors) unless there is clear evidence of danger.
+
+        
+        Your response format:
+        
+        - Short Summary: Describe what happens in the frames concisely.
+        
+        - Anomaly Assessment; Clearly state whether the activity is truly an anomaly based on the strict definition above.
+        
+        - Anomaly Score: Assign a value from 0 (completely normal) to 1 (clearly dangerous); only assign above 0.5 if the event is truly alarming.
+        
+        - JSON object:
+        
+        ```json
+        
+        {
+        
+        "anomaly_score": <value between 0 and 1>,
+        
+        "description": "<your justification>"
+        
+        }
+        
+        ```
+
+        
+        Here are the frames you have to analyze:
+        
+        <frames>
+        '
+    batch_size: 6
+    parameters:
+        temperature: 0.0
+        top_k: 1
+        top_p: 0
+        seed: 0
+        max_token: 4096
+    device: "cuda:1"
+    host: localhost:11111
+    save_file: "~/agenticvad/results/responses.tmp"
+    log: "INFO"
+
+notifier:
+    threshold: 0.5
+    result_key: "anomaly_score"
+    description_key: "description"
+    log: "INFO"
+
+log: "INFO"

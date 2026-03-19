@@ -1,0 +1,36 @@
+name: llamacpp
+dependencies:
+    # Python
+    - python=3.12
+    - pip
+    - llama.cpp
+    - pip:
+
+        # Configuration
+        - PyYAML
+
+        # Medias
+        - pillow
+        - pandas
+        - opencv-python
+        - ipywidgets
+        - matplotlib
+
+        # Evaluate
+        - scikit-learn
+
+        # Gradio
+        - gradio
+
+        # Core runtime used by the project (CPU-only torch is fine)
+        - torch
+
+        # HTTP client for llama.cpp OpenAI API
+        - requests
+
+        # (Optional) Add extras you may need:
+        - torchvision
+        - numpy
+        - ollama 
+
+        

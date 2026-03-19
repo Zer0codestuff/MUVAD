@@ -1,0 +1,29 @@
+name: deepseek
+dependencies:
+    # Python
+    - python=3.12
+    - pip
+    - pip:
+
+        # Configuration
+        - PyYAML
+
+        # Medias
+        - pillow
+        - opencv-python
+
+        # Evaluate
+        - scikit-learn
+
+        # Hugging face
+        - torch
+        - transformers
+        - accelerate
+        - bitsandbytes
+
+        # Ollama
+        - ollama
+
+        # DeepSeek-VL2
+        - https://github.com/deepseek-ai/DeepSeek-VL2/archive/main.zip
+        - numpy<2
