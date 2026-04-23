@@ -45,6 +45,9 @@ except ModuleNotFoundError as exc:
         "Gradio is not installed. Install it with 'pip install gradio'."
     ) from exc
 
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
 # For plotting
 import plotly.graph_objects as go
 import matplotlib
