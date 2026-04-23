@@ -28,7 +28,7 @@ except ModuleNotFoundError as exc:  # pragma: no cover
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from demos.vad_showcase import parse_args, run_pipeline  # type: ignore
+from demos.vad_showcase import ANOMALY_PROMPT, parse_args, run_pipeline  # type: ignore
 
 
 def _server_video_choices() -> list[str]:
@@ -70,6 +70,7 @@ def _resolve_server_video(selection: Optional[str]) -> Optional[Path]:
 def _build_args(
     *,
     video_path: Path,
+    prompt: str,
     resize: str,
     select_fps: float,
     diff_th: float,
@@ -104,6 +105,8 @@ def _build_args(
 
     args.workdir = str(run_dir)
     args.input = str(video_path)
+    args.prompt = str(prompt)
+    args.prompt_file = None
     args.resize = resize.strip() or None
     args.select_fps = float(select_fps)
     args.diff_th = float(diff_th)
@@ -140,6 +143,7 @@ def _build_args(
 def _run_analysis(
     video_path: Optional[str],
     server_video: Optional[str],
+    prompt: str,
     resize: str,
     select_fps: float,
     diff_th: float,
@@ -190,6 +194,7 @@ def _run_analysis(
 
     args, output_path = _build_args(
         video_path=source,
+        prompt=prompt,
         resize=resize,
         select_fps=select_fps,
         diff_th=diff_th,
@@ -242,6 +247,7 @@ def _run_analysis(
         "--workdir", args.workdir,
         "--input", args.input,
         "--output", args.output,
+        "--prompt", args.prompt,
         "--select-fps", str(args.select_fps),
         "--diff-th", str(args.diff_th),
         "--window-size", str(args.window_size),
@@ -396,6 +402,7 @@ def build_interface() -> gr.Blocks:
         )
 
         with gr.Accordion("Analysis options", open=False):
+            prompt = gr.Textbox(label="Anomaly prompt", value=ANOMALY_PROMPT, lines=16)
             resize = gr.Textbox(label="Resize (e.g. 1280x720)", value="", placeholder="Leave empty to keep the original size")
             select_fps = gr.Slider(label="Select FPS", minimum=0.1, maximum=10.0, value=2.0, step=0.1)
             diff_th = gr.Number(label="Diff threshold", value=1e18)
@@ -430,6 +437,7 @@ def build_interface() -> gr.Blocks:
             inputs=[
                 video_input,
                 server_video,
+                prompt,
                 resize,
                 select_fps,
                 diff_th,
@@ -496,5 +504,4 @@ def main(argv: Optional[Tuple[str, ...]] = None) -> None:
 
 if __name__ == "__main__":
     main()
-
 

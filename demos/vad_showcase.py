@@ -30,6 +30,7 @@ import time
 import subprocess
 import signal
 from dataclasses import dataclass
+from functools import lru_cache
 from math import ceil
 from pathlib import Path
 from typing import Dict, List, Optional, Sequence, Tuple
@@ -76,6 +77,15 @@ ANOMALY_PROMPT = (
 )
 
 
+def resolve_anomaly_prompt(prompt: Optional[str] = None, prompt_file: Optional[str] = None) -> str:
+    """Resolve the active anomaly prompt from inline text or a file."""
+    if prompt is not None and str(prompt).strip():
+        return str(prompt)
+    if prompt_file:
+        return Path(prompt_file).expanduser().resolve().read_text(encoding="utf-8")
+    return ANOMALY_PROMPT
+
+
 def _image_to_data_url(img: Image.Image | str) -> str:
     if isinstance(img, str):
         img = Image.open(img).convert("RGB")
@@ -83,6 +93,13 @@ def _image_to_data_url(img: Image.Image | str) -> str:
     img.save(buf, format="PNG")
     b64 = base64.b64encode(buf.getvalue()).decode("utf-8")
     return f"data:image/png;base64,{b64}"
+
+
+@lru_cache(maxsize=64)
+def _load_rgb_image(path_str: str) -> Image.Image:
+    """Load an image once and reuse it across inference/rendering steps."""
+    with Image.open(path_str) as img:
+        return img.convert("RGB").copy()
 
 
 def _parse_json_any(text: str) -> Optional[dict]:
@@ -383,6 +400,7 @@ class InferenceParams:
     temperature: float = 0.0
     top_p: float = 0.0
     health_timeout: float = 60.0
+    prompt: str = ANOMALY_PROMPT
 
 
 def extract_and_select_frames(
@@ -395,20 +413,64 @@ def extract_and_select_frames(
     diff_threshold: float,
 ) -> Tuple[float, np.ndarray, List[Tuple[Path, float]]]:
     ensure_empty_dir(frames_dir)
-    print("[1/5] Extracting frames…", flush=True)
-    video_fps, frame_timestamps = extract_frames(str(video_path), frames_dir, resize=resize)
-    duration = len(frame_timestamps) / video_fps if video_fps else 0.0
-    print(f"    Frames: {len(frame_timestamps)} | Video FPS ≈ {video_fps:.2f} | Duration ≈ {duration:.2f}s")
-
-    stride = max(1, int(round(video_fps / float(max(0.1, select_fps)))))
     ensure_empty_dir(selected_dir)
-    print(f"[2/5] Selecting frames (stride={stride}, diff_th={diff_threshold})…", flush=True)
-    selected_frames = select_frames(
-        frames_dir,
-        frame_timestamps,
-        selected_dir,
-        stride=stride,
-        diff_threshold=float(diff_threshold),
+    print("[1/4] Extracting and selecting frames…", flush=True)
+
+    if cv2 is None:
+        raise RuntimeError("OpenCV (cv2) not available: install opencv-python")
+
+    cap = cv2.VideoCapture(str(video_path))
+    if not cap.isOpened():
+        raise RuntimeError(f"Cannot open video: {video_path}")
+
+    video_fps = float(cap.get(cv2.CAP_PROP_FPS) or 30.0)
+    stride = max(1, int(round(video_fps / float(max(0.1, select_fps)))))
+    timestamps: List[float] = []
+    selected_frames: List[Tuple[Path, float]] = []
+    previous_gray = None
+    frame_index = 0
+
+    try:
+        while True:
+            ok, frame_bgr = cap.read()
+            if not ok:
+                break
+
+            if resize is not None:
+                frame_bgr = cv2.resize(frame_bgr, resize, interpolation=cv2.INTER_AREA)
+
+            frame_gray = cv2.cvtColor(frame_bgr, cv2.COLOR_BGR2GRAY)
+            timestamp = (frame_index / video_fps) if video_fps else 0.0
+            timestamps.append(timestamp)
+
+            keep_frame = frame_index % stride == 0
+            if not keep_frame and previous_gray is not None:
+                diff = cv2.absdiff(frame_gray, previous_gray)
+                keep_frame = float(diff.mean()) > float(diff_threshold)
+
+            if keep_frame:
+                frame_path = selected_dir / f"frame_{frame_index:06d}.jpg"
+                ok_write = cv2.imwrite(
+                    str(frame_path),
+                    frame_bgr,
+                    [int(cv2.IMWRITE_JPEG_QUALITY), 95],
+                )
+                if not ok_write:
+                    raise RuntimeError(f"Failed to save frame: {frame_path}")
+                selected_frames.append((frame_path, float(timestamp)))
+
+            previous_gray = frame_gray
+            frame_index += 1
+    finally:
+        cap.release()
+
+    frame_timestamps = np.array(timestamps, dtype=np.float32)
+    duration = float(frame_timestamps[-1]) if len(frame_timestamps) else 0.0
+    print(
+        "    "
+        f"Frames: {len(frame_timestamps)} | Selected: {len(selected_frames)} | "
+        f"Video FPS ≈ {video_fps:.2f} | Duration ≈ {duration:.2f}s | "
+        f"stride={stride} | diff_th={diff_threshold}"
     )
     return video_fps, frame_timestamps, selected_frames
 
@@ -424,6 +486,7 @@ def build_inference_params(args: argparse.Namespace) -> InferenceParams:
         temperature=float(args.temperature),
         top_p=float(args.top_p),
         health_timeout=float(args.health_timeout),
+        prompt=resolve_anomaly_prompt(getattr(args, "prompt", None), getattr(args, "prompt_file", None)),
     )
 
 
@@ -464,10 +527,10 @@ def run_window_inference(
     S = int(params.window_step)
     for b in range(0, len(frame_paths) - (W - 1), S):
         window_paths = frame_paths[b:b + W]
-        images = [Image.open(selected_dir / p.name).convert("RGB") for p in window_paths]
+        images = [_load_rgb_image(str(selected_dir / p.name)) for p in window_paths]
         raw = vision_chat(
             images,
-            ANOMALY_PROMPT,
+            params.prompt,
             base_url=params.base_url,
             model=params.model,
             max_tokens=params.max_tokens,
@@ -551,7 +614,7 @@ def _wrap_text(text: str, max_chars: int = 220, line_w: int = 44, max_sent: int 
 
 
 def _grid_image(selected_dir: Path, names: Sequence[str], cols: int = 3, tile: int = 320) -> Image.Image:
-    imgs = [Image.open(selected_dir / p).convert("RGB") for p in names]
+    imgs = [_load_rgb_image(str(selected_dir / p)) for p in names]
     if not imgs:
         return Image.new("RGB", (200, 200), (240, 240, 240))
     cols = max(1, min(cols, len(imgs)))
@@ -603,7 +666,7 @@ def _draw_frame(
     ax_prev = fig.add_subplot(gs[0, 0])
     ax_prev.set_axis_off()
     curr_path = selected_dir / all_names[frame_i]
-    ax_prev.imshow(Image.open(curr_path).convert("RGB"))
+    ax_prev.imshow(_load_rgb_image(str(curr_path)))
     ax_prev.set_title(f"Frame {frame_i+1}/{len(all_names)}", fontsize=12)
 
     ax_grid = fig.add_subplot(gs[0, 1])
@@ -771,6 +834,8 @@ def parse_args(argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
     parser.add_argument("--threshold", type=float, default=0.5)
     parser.add_argument("--llama-url", type=str, default="http://localhost:1234")
     parser.add_argument("--llama-model", type=str, default="lmstudio-community/InternVL3_5-2B-GGUF:Q8_0")
+    parser.add_argument("--prompt", type=str, default=None, help="Inline anomaly prompt override")
+    parser.add_argument("--prompt-file", type=str, default=None, help="Path to a UTF-8 text file containing the anomaly prompt")
     parser.add_argument("--max-tokens", type=int, default=512)
     parser.add_argument("--temperature", type=float, default=0.0)
     parser.add_argument("--top-p", type=float, default=0.0)
@@ -826,6 +891,7 @@ def save_inference_data(
         "video_total_s": video_total_s,
         "threshold": threshold,
         "window_step": window_step,
+        "prompt": df.attrs.get("prompt", ANOMALY_PROMPT),
         "segments": segments,
         "selected_frames": [
             {"name": p.name, "timestamp": float(ts)}
@@ -874,7 +940,7 @@ def run_pipeline(args: argparse.Namespace) -> int:
     name_to_ts: Dict[str, float] = {p.name: float(ts) for p, ts in selected_frames}
     video_total_s = float(frame_timestamps[-1]) if len(frame_timestamps) else 0.0
 
-    print("[3/5] Window inference (vision-chat)…", flush=True)
+    print("[2/4] Window inference (vision-chat)…", flush=True)
     server_proc: Optional[subprocess.Popen] = None
     try:
         server_proc, start_error = maybe_autostart_server(args, dirs.output)
@@ -883,11 +949,12 @@ def run_pipeline(args: argparse.Namespace) -> int:
 
         infer_params = build_inference_params(args)
         df = run_window_inference(dirs.frames_selected, selected_frames, infer_params)
+        df.attrs["prompt"] = infer_params.prompt
         if df.empty:
             print("No results from model.")
             return 3
 
-        print("[4/5] Computing anomalous segments…", flush=True)
+        print("[3/4] Computing anomalous segments…", flush=True)
         segments = compute_segments(df)
         if segments:
             print("    Segments (frame_start, frame_end):", segments)
@@ -906,7 +973,7 @@ def run_pipeline(args: argparse.Namespace) -> int:
             window_step=int(args.window_step),
         )
 
-        print(f"[5/5] Rendering video → {output_path}", flush=True)
+        print(f"[4/4] Rendering video → {output_path}", flush=True)
         rparams = RenderParams(
             grid_cols=int(args.grid_cols),
             grid_tile=int(args.grid_tile),
@@ -947,5 +1014,3 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
 if __name__ == "__main__":
     sys.exit(main())
-
-

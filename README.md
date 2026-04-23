@@ -688,12 +688,21 @@ python demos/vad_showcase.py -i /path/to/video.mp4 \
 # change rendering (output fps, size)
 python demos/vad_showcase.py -i /path/to/video.mp4 \
   --render-fps 2.5 --resize 1280x720
+
+# override the anomaly prompt inline
+python demos/vad_showcase.py -i /path/to/video.mp4 \
+  --prompt "You are a safety analyst. Return JSON with anomaly_score and description."
+
+# load the anomaly prompt from a text file
+python demos/vad_showcase.py -i /path/to/video.mp4 \
+  --prompt-file /path/to/prompt.txt
 ```
 
 Outputs and workspace:
-- Extracted frames: `assets/videos_and_frames/frames_full/`
 - Selected frames (≈2 fps by default): `assets/videos_and_frames/frames_selected/`
 - Final annotated video (MP4): `assets/videos_and_frames/output/<video>_vad_showcase.mp4`
+
+To keep the pipeline fast, the showcase now selects frames while decoding the video and only saves the selected frames to disk.
 
 Show all flags and defaults:
 
@@ -727,10 +736,59 @@ python demos/vad_showcase_gradio.py --host 0.0.0.0 --port 8080
 Features:
 - Upload videos directly through the web interface
 - Configure all analysis parameters via UI controls
+- Edit the anomaly prompt directly from the UI
 - View pipeline logs in real-time
 - Download the generated annotated video
 
-The Gradio interface uses the same underlying pipeline as the CLI script, with outputs saved to `results/gradio_runs/run_<timestamp>/`.
+The Gradio interface uses the same underlying pipeline as the CLI script, with outputs saved to `tmp/gradio_runs/run_<timestamp>/`.
+
+### Web UI Demo: VAD Evaluation (Gradio)
+
+The evaluation Gradio app lets you:
+- browse previously processed runs
+- inspect the selected-frame windows, anomaly scores, and generated explanations
+- rate the quality of each run
+- process new videos from a configurable video directory
+- override the anomaly prompt used for new runs
+- upload a video in the evaluation tab and process it directly from there
+
+Quick start:
+
+```bash
+python demos/vad_evaluation_gradio.py
+```
+
+The interface is available at `http://127.0.0.1:7861` by default.
+
+By default, the "Process Videos" tab scans `data/` recursively for videos. You can override that in two portable ways:
+
+```bash
+# override from the command line
+python demos/vad_evaluation_gradio.py --data-dir /path/to/videos
+
+# or with environment variables
+MUVAD_DATA_DIR=/path/to/videos python demos/vad_evaluation_gradio.py
+```
+
+Additional useful overrides:
+
+```bash
+python demos/vad_evaluation_gradio.py \
+  --data-dir /path/to/videos \
+  --runs-dir /path/to/gradio_runs \
+  --evaluations-file /path/to/vad_evaluations.json
+```
+
+Outputs used by the evaluation UI:
+- Processed runs: `tmp/gradio_runs/`
+- Ratings JSON: `tmp/vad_evaluations.json`
+- Ratings CSV export: `tmp/vad_evaluations.csv`
+
+Typical workflow:
+1. Process one or more videos from the "Process Videos" tab.
+2. Or upload a video directly in "Evaluate Runs" and start processing from the upload section.
+3. Review the anomaly timeline, frame windows, and summary.
+4. Save your rating and optionally export all ratings to CSV.
 
 
 ## Contributing
@@ -766,4 +824,3 @@ If you use this work in your research, please cite:
 ## Acknowledgments
 
 <!-- TODO: Add acknowledgments -->
-

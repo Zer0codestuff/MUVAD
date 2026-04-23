@@ -26,9 +26,17 @@ GRADIO_TMP_DIR = REPO_ROOT / "tmp" / "gradio_temp"
 GRADIO_TMP_DIR.mkdir(parents=True, exist_ok=True)
 os.environ.setdefault("GRADIO_TEMP_DIR", str(GRADIO_TMP_DIR))
 
-RUNS_DIR = REPO_ROOT / "tmp" / "gradio_runs"
-DATA_DIR = REPO_ROOT / "data"
-EVALUATIONS_FILE = REPO_ROOT / "tmp" / "vad_evaluations.json"
+
+def _resolve_runtime_path(value: str | Path) -> Path:
+    return Path(value).expanduser().resolve()
+
+
+RUNS_DIR = _resolve_runtime_path(os.environ.get("MUVAD_GRADIO_RUNS_DIR", REPO_ROOT / "tmp" / "gradio_runs"))
+DATA_DIR = _resolve_runtime_path(os.environ.get("MUVAD_DATA_DIR", REPO_ROOT / "data"))
+EVALUATIONS_FILE = _resolve_runtime_path(
+    os.environ.get("MUVAD_EVALUATIONS_FILE", REPO_ROOT / "tmp" / "vad_evaluations.json")
+)
+VIDEO_EXTENSIONS = (".mp4", ".avi", ".mov", ".mkv", ".wmv", ".flv", ".webm")
 
 try:
     import gradio as gr
@@ -42,6 +50,8 @@ import plotly.graph_objects as go
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+
+from demos.vad_showcase import ANOMALY_PROMPT
 
 
 # ------------------------------
@@ -411,14 +421,20 @@ def _get_all_data_videos() -> List[Path]:
     if not DATA_DIR.exists():
         return []
 
-    video_extensions = {".mp4", ".avi", ".mov", ".mkv", ".wmv", ".flv"}
     videos: List[Path] = []
 
     for path in DATA_DIR.rglob("*"):
-        if path.is_file() and path.suffix.lower() in video_extensions:
+        if path.is_file() and path.suffix.lower() in VIDEO_EXTENSIONS:
             videos.append(path)
 
     return sorted(videos)
+
+
+def _list_video_files(directory: Path) -> List[Path]:
+    return sorted(
+        path for path in directory.iterdir()
+        if path.is_file() and path.suffix.lower() in VIDEO_EXTENSIONS
+    )
 
 
 def _get_processed_video_names() -> set:
@@ -463,11 +479,22 @@ def _get_unprocessed_videos() -> List[Tuple[str, Path]]:
     return unprocessed
 
 
+def _next_run_dir(video_stem: str) -> Path:
+    """Allocate a run directory name without collisions."""
+    run_dir = RUNS_DIR / video_stem
+    if run_dir.exists():
+        timestamp = time.strftime("%Y%m%d_%H%M%S")
+        run_dir = RUNS_DIR / f"{video_stem}_{timestamp}"
+    return run_dir
+
+
 def _run_video_processing(
     video_path: str,
     llama_url: str,
     llama_model: str,
+    prompt: str,
     autostart_server: bool = True,
+    run_dir: Optional[Path] = None,
 ) -> Iterator[str]:
     """Run the VAD pipeline on a video and yield log output."""
     if not video_path:
@@ -479,14 +506,8 @@ def _run_video_processing(
         yield f"Error: Video not found: {video_path}"
         return
 
-    # Create a run directory named after the video
-    # Use timestamp only if the directory already exists to avoid collisions
     video_stem = video.stem
-    run_dir = RUNS_DIR / video_stem
-    if run_dir.exists():
-        timestamp = time.strftime("%Y%m%d_%H%M%S")
-        run_dir = RUNS_DIR / f"{video_stem}_{timestamp}"
-    
+    run_dir = run_dir or _next_run_dir(video_stem)
     run_dir.mkdir(parents=True, exist_ok=True)
 
     output_path = run_dir / "output" / f"{video.stem}_vad_showcase.mp4"
@@ -510,6 +531,7 @@ def _run_video_processing(
         "--output", str(output_path),
         "--llama-url", llama_url,
         "--llama-model", llama_model,
+        "--prompt", prompt,
         "--resize", "448x448",  # Resize frames for VL model
         "--select-fps", "2.0",
         "--window-size", "6",
@@ -638,9 +660,8 @@ def _get_video_path(run_name: str) -> Optional[Path]:
     # The original video is stored in the 'videos' subdirectory of the run
     videos_dir = run_dir / "videos"
     if videos_dir.exists():
-        video_files = list(videos_dir.glob("*.mp4"))
+        video_files = _list_video_files(videos_dir)
         if video_files:
-            # Return the first mp4 file found in the videos directory
             return video_files[0]
             
     # Fallback: check output directory for showcase if original not found
@@ -670,7 +691,7 @@ def _load_evaluations() -> Dict[str, Any]:
     """Load existing evaluations from file."""
     if EVALUATIONS_FILE.exists():
         try:
-            with open(EVALUATIONS_FILE, "r") as f:
+            with open(EVALUATIONS_FILE, "r", encoding="utf-8") as f:
                 return json.load(f)
         except (json.JSONDecodeError, IOError):
             pass
@@ -682,7 +703,7 @@ def _save_evaluation(evaluation: Dict[str, Any]) -> None:
     data = _load_evaluations()
     data["evaluations"].append(evaluation)
     EVALUATIONS_FILE.parent.mkdir(parents=True, exist_ok=True)
-    with open(EVALUATIONS_FILE, "w") as f:
+    with open(EVALUATIONS_FILE, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2)
 
 
@@ -1489,6 +1510,37 @@ def build_interface() -> gr.Blocks:
                     )
                 upload_status = gr.Markdown(value="")
 
+                with gr.Accordion("Process Uploaded Video", open=False):
+                    with gr.Row():
+                        upload_llama_url_input = gr.Textbox(
+                            label=t("llama_url", "en"),
+                            value="http://localhost:8080",
+                        )
+                        upload_llama_model_input = gr.Textbox(
+                            label=t("llama_model", "en"),
+                            value=DEFAULT_LLM_MODEL,
+                        )
+
+                    upload_prompt_input = gr.Textbox(
+                        label="Anomaly prompt",
+                        value=ANOMALY_PROMPT,
+                        lines=12,
+                    )
+
+                    upload_autostart_checkbox = gr.Checkbox(
+                        label=t("autostart_label", "en"),
+                        value=True,
+                        info=t("autostart_info", "en"),
+                    )
+
+                    upload_process_btn = gr.Button("Process uploaded video", variant="secondary")
+                    upload_process_logs = gr.Textbox(
+                        label=t("processing_logs", "en"),
+                        lines=10,
+                        max_lines=16,
+                        interactive=False,
+                    )
+
                 # ========================================
                 # VIDEO PLAYER - First thing shown
                 # ========================================
@@ -1643,6 +1695,50 @@ def build_interface() -> gr.Blocks:
                     outputs=[video_player, upload_status],
                 )
 
+                def process_uploaded_video(file_path, url, model, prompt, autostart):
+                    if not file_path:
+                        yield "Error: Please upload a video first.", gr.update(), "_No uploaded video selected._"
+                        return
+
+                    uploaded_path = Path(file_path)
+                    target_run_dir = _next_run_dir(uploaded_path.stem)
+                    processing_status = f"_Processing uploaded video `{uploaded_path.name}`..._"
+
+                    latest_log = ""
+                    yield latest_log, gr.update(), processing_status
+                    for log in _run_video_processing(
+                        str(uploaded_path),
+                        url,
+                        model,
+                        prompt,
+                        autostart,
+                        run_dir=target_run_dir,
+                    ):
+                        latest_log = log
+                        yield latest_log, gr.update(), processing_status
+
+                    new_runs = _get_available_runs()
+                    run_ready = target_run_dir.name in new_runs and _get_inference_data_path(target_run_dir.name) is not None
+                    final_status = (
+                        f"_Uploaded video processed into run `{target_run_dir.name}`._"
+                        if run_ready
+                        else f"_Processing finished, but no evaluable run was found for `{uploaded_path.name}`._"
+                    )
+                    selector_update = gr.update(choices=new_runs, value=target_run_dir.name if run_ready else None)
+                    yield latest_log, selector_update, final_status
+
+                upload_process_btn.click(
+                    fn=process_uploaded_video,
+                    inputs=[
+                        video_upload,
+                        upload_llama_url_input,
+                        upload_llama_model_input,
+                        upload_prompt_input,
+                        upload_autostart_checkbox,
+                    ],
+                    outputs=[upload_process_logs, run_selector, upload_status],
+                )
+
                 run_selector.change(
                     fn=_on_run_select,
                     inputs=[run_selector, lang_state],
@@ -1742,6 +1838,12 @@ def build_interface() -> gr.Blocks:
                         value=DEFAULT_LLM_MODEL,
                     )
 
+                prompt_input = gr.Textbox(
+                    label="Anomaly prompt",
+                    value=ANOMALY_PROMPT,
+                    lines=16,
+                )
+
                 autostart_checkbox = gr.Checkbox(
                     label=t("autostart_label", "en"),
                     value=True,
@@ -1778,17 +1880,17 @@ def build_interface() -> gr.Blocks:
                     outputs=[video_selector, video_paths_state],
                 )
 
-                def start_processing(video_name, paths, url, model, autostart):
+                def start_processing(video_name, paths, url, model, prompt, autostart):
                     if not video_name or video_name not in paths:
                         yield "Error: Please select a video first."
                         return
                     video_path = paths[video_name]
-                    for log in _run_video_processing(video_path, url, model, autostart):
+                    for log in _run_video_processing(video_path, url, model, prompt, autostart):
                         yield log
 
                 process_btn.click(
                     fn=start_processing,
-                    inputs=[video_selector, video_paths_state, llama_url_input, llama_model_input, autostart_checkbox],
+                    inputs=[video_selector, video_paths_state, llama_url_input, llama_model_input, prompt_input, autostart_checkbox],
                     outputs=[process_logs],
                 )
 
@@ -1804,6 +1906,11 @@ def build_interface() -> gr.Blocks:
                 gr.update(label=f"{t('select_video', lang)} ({num_unprocessed} {t('unprocessed', lang)})"),  # video_selector
                 gr.update(label=t("llama_url", lang)),  # llama_url_input
                 gr.update(label=t("llama_model", lang)),  # llama_model_input
+                gr.update(label=t("llama_url", lang)),  # upload_llama_url_input
+                gr.update(label=t("llama_model", lang)),  # upload_llama_model_input
+                gr.update(label=t("autostart_label", lang), info=t("autostart_info", lang)),  # upload_autostart_checkbox
+                gr.update(value=t("start_processing", lang)),  # upload_process_btn
+                gr.update(label=t("processing_logs", lang)),  # upload_process_logs
                 gr.update(label=t("autostart_label", lang), info=t("autostart_info", lang)),  # autostart_checkbox
                 gr.update(value=t("start_processing", lang)),  # process_btn
                 gr.update(label=t("processing_logs", lang)),  # process_logs
@@ -1847,6 +1954,11 @@ def build_interface() -> gr.Blocks:
                 video_selector,
                 llama_url_input,
                 llama_model_input,
+                upload_llama_url_input,
+                upload_llama_model_input,
+                upload_autostart_checkbox,
+                upload_process_btn,
+                upload_process_logs,
                 autostart_checkbox,
                 process_btn,
                 process_logs,
@@ -1886,10 +1998,30 @@ def build_interface() -> gr.Blocks:
 
 def main(argv: Optional[Tuple[str, ...]] = None) -> None:
     """Main entry point."""
+    global DATA_DIR, RUNS_DIR, EVALUATIONS_FILE
+
     parser = argparse.ArgumentParser(description="Gradio interface for VAD evaluation")
     parser.add_argument("--host", type=str, default="0.0.0.0", help="Host for the Gradio server")
     parser.add_argument("--port", type=int, default=7861, help="Port for the Gradio server")
     parser.add_argument("--share", action="store_true", help="Share the interface publicly")
+    parser.add_argument(
+        "--data-dir",
+        type=str,
+        default=None,
+        help="Directory scanned for videos to process (defaults to MUVAD_DATA_DIR or ./data)",
+    )
+    parser.add_argument(
+        "--runs-dir",
+        type=str,
+        default=None,
+        help="Directory containing Gradio runs (defaults to MUVAD_GRADIO_RUNS_DIR or ./tmp/gradio_runs)",
+    )
+    parser.add_argument(
+        "--evaluations-file",
+        type=str,
+        default=None,
+        help="JSON file used to store ratings (defaults to MUVAD_EVALUATIONS_FILE or ./tmp/vad_evaluations.json)",
+    )
     parser.add_argument(
         "--auth",
         type=str,
@@ -1897,6 +2029,13 @@ def main(argv: Optional[Tuple[str, ...]] = None) -> None:
         help="Optional basic auth 'user:password'",
     )
     args = parser.parse_args(argv)
+
+    if args.data_dir:
+        DATA_DIR = _resolve_runtime_path(args.data_dir)
+    if args.runs_dir:
+        RUNS_DIR = _resolve_runtime_path(args.runs_dir)
+    if args.evaluations_file:
+        EVALUATIONS_FILE = _resolve_runtime_path(args.evaluations_file)
 
     demo = build_interface()
 
