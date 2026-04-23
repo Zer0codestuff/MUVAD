@@ -161,6 +161,7 @@ class LlamaCppModel:
         self.top_p = params.pop("top_p", None)
         self.stop = params.pop("stop", None)
         self.seed = params.pop("seed", None)
+        self.autostart = bool(params.pop("autostart", True))
 
         server_cfg = {}
         nested = params.pop("llamacpp_server", None)
@@ -200,7 +201,10 @@ class LlamaCppModel:
 
         wait_timeout = 5.0
         if any(h in self.host for h in ("localhost", "127.0.0.1", "0.0.0.0")):
-            restart_llamacpp_server(self.host, server_cfg)
+            if self.autostart:
+                restart_llamacpp_server(self.host, server_cfg)
+            else:
+                logger.info("llama.cpp autostart disabled for %s", self.host)
             heavy = bool(server_cfg.get("hf") or server_cfg.get("model"))
             wait_timeout = float(server_cfg.get("ready_timeout", 300.0 if heavy else 20.0))
         else:
@@ -417,5 +421,4 @@ class LlamaCppModel:
             except Exception as err2:
                 logger.warning(f"Completions endpoint failed ({err2}); returning empty string")
                 return ""
-
 
