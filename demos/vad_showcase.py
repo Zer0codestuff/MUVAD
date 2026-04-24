@@ -168,7 +168,7 @@ def start_llama_server(
     if extra_args:
         cmd.extend(shlex.split(extra_args))
     log_path.parent.mkdir(parents=True, exist_ok=True)
-    log_f = open(log_path, "a", buffering=1)
+    log_f = open(log_path, "a", buffering=1, encoding="utf-8", errors="replace")
     proc = subprocess.Popen(
         cmd,
         stdout=log_f,

@@ -63,7 +63,10 @@ class Detector(Module):
 
         # Check save file
         if self.save_file:
-            open(self.save_file, "w").close()
+            save_dir = os.path.dirname(self.save_file)
+            if save_dir:
+                os.makedirs(save_dir, exist_ok=True)
+            open(self.save_file, "w", encoding="utf-8", errors="replace").close()
 
         # Start module
         super().start()
@@ -95,7 +98,7 @@ class Detector(Module):
 
         # Save outputs in file
         if self.save_file:
-            with open(self.save_file, "a") as save_file:
+            with open(self.save_file, "a", encoding="utf-8", errors="replace") as save_file:
                 save_file.write(output)
 
         return [output]

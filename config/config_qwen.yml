@@ -1,6 +1,5 @@
 evaluate:
-    videos_dir: "/home/gmonni54/agenticvad/data
-    /ucf_crime/videos"
+    videos_dir: "data/ucf_crime/videos"
     normal_video_indicator: "Normal_Videos"
 
 extractor:
@@ -80,7 +79,7 @@ captioner:
     device: "cuda:0"
     backend: llamacpp
     host: localhost:8080
-    save_file: "/home/gmonni54/agenticvad/results/responses.tmp"
+    save_file: "results/responses.tmp"
     log: "INFO"
 
 detector:
@@ -91,7 +90,7 @@ detector:
     device: "cuda:0"
     backend: ollama  # options: ollama | llamacpp
     host: localhost:11111
-    save_file: "/home/gmonni54/agenticvad/results/responses.tmp"
+    save_file: "results/responses.tmp"
     log: "INFO"
 
 notifier:
@@ -104,5 +103,4 @@ notifier:
     log: "INFO"
 
 log: "INFO"
-
 

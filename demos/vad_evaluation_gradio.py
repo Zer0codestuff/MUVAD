@@ -274,7 +274,7 @@ def _start_llama_server(
         print(f"[LLM Server] Command: {' '.join(cmd)}")
         print(f"[LLM Server] Log file: {log_path}")
         
-        log_f = open(log_path, "a", buffering=1)
+        log_f = open(log_path, "a", buffering=1, encoding="utf-8", errors="replace")
         _llama_server_process = subprocess.Popen(
             cmd,
             stdout=log_f,

@@ -42,7 +42,7 @@ def getLogger(name: str) -> logging.Logger:
 
     # Print log in file
     log_file = os.path.join(os.path.dirname(__file__), 'experiment.log')
-    file_handler = logging.FileHandler(log_file)
+    file_handler = logging.FileHandler(log_file, encoding="utf-8", errors="replace")
     file_handler.setFormatter(logging.Formatter(format))
     logger.addHandler(file_handler)
 

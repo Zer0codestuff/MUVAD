@@ -6,6 +6,7 @@ import requests
 import json
 import io
 import base64
+import shlex
 from concurrent.futures import ThreadPoolExecutor
 
 # Get logger
@@ -33,8 +34,13 @@ def _parse_port_from_host(host: str) -> int:
     return 8080
 
 
+def _safe_text(text: object) -> str:
+    return str(text or "").encode("utf-8", errors="replace").decode("utf-8", errors="replace")
+
+
 # Track spawned llama.cpp servers by host
 llamacpp_servers: dict[str, subprocess.Popen] = {}
+llamacpp_log_handles: dict[str, object] = {}
 
 
 def restart_llamacpp_server(host: str, server_cfg: dict | None = None, timeout: float = 1.5) -> None:
@@ -67,7 +73,7 @@ def restart_llamacpp_server(host: str, server_cfg: dict | None = None, timeout: 
     if explicit_cmd:
         # If provided as a string, split by spaces; otherwise assume list
         if isinstance(explicit_cmd, str):
-            cmd = explicit_cmd.split()
+            cmd = shlex.split(explicit_cmd)
         else:
             cmd = list(explicit_cmd)
         # Ensure the desired port is included; append if missing
@@ -105,20 +111,42 @@ def restart_llamacpp_server(host: str, server_cfg: dict | None = None, timeout: 
         cmd += [str(a) for a in extra_args]
 
     show_output = bool(server_cfg.get("show_output", False))
+    log_path = server_cfg.get("log_file") or server_cfg.get("log_path")
+    log_handle = None
+    stdout_target = None
+    stderr_target = None
+    if not show_output:
+        if log_path:
+            os.makedirs(os.path.dirname(os.path.abspath(str(log_path))), exist_ok=True)
+            log_handle = open(str(log_path), "a", buffering=1, encoding="utf-8", errors="replace")
+            stdout_target = log_handle
+            stderr_target = subprocess.STDOUT
+        else:
+            stdout_target = subprocess.DEVNULL
+            stderr_target = subprocess.DEVNULL
     logger.debug(f"Starting llama.cpp server on {host}: {' '.join(cmd)}")
-    proc = subprocess.Popen(
-        cmd,
-        stdout=None if show_output else subprocess.DEVNULL,
-        stderr=None if show_output else subprocess.DEVNULL,
-        env=os.environ.copy(),
-    )
+    try:
+        proc = subprocess.Popen(
+            cmd,
+            stdout=None if show_output else stdout_target,
+            stderr=None if show_output else stderr_target,
+            env=os.environ.copy(),
+        )
+    except FileNotFoundError as err:
+        if log_handle:
+            log_handle.close()
+        raise RuntimeError("llama-server executable not found. Install llama.cpp or set parameters.server.cmd.") from err
 
     time.sleep(timeout)
     if proc.poll() is None:
         llamacpp_servers[host] = proc
+        if log_handle:
+            llamacpp_log_handles[host] = log_handle
         logger.info(f"llama.cpp server started on {host}")
     else:
-        logger.warning("Failed to start llama.cpp server or it is already running")
+        if log_handle:
+            log_handle.close()
+        raise RuntimeError(f"llama.cpp server exited during startup on {host}")
 
     atexit.register(stop_llamacpp_server, host)
 
@@ -132,6 +160,12 @@ def stop_llamacpp_server(host: str) -> None:
         except Exception:
             pass
         llamacpp_servers.pop(host, None)
+    log_handle = llamacpp_log_handles.pop(host, None)
+    if log_handle:
+        try:
+            log_handle.close()
+        except Exception:
+            pass
 
 
 class LlamaCppModel:
@@ -162,6 +196,9 @@ class LlamaCppModel:
         self.stop = params.pop("stop", None)
         self.seed = params.pop("seed", None)
         self.autostart = bool(params.pop("autostart", True))
+        self.request_timeout = float(params.pop("request_timeout", 120.0))
+        self.allow_text_fallback = bool(params.pop("allow_text_fallback", False))
+        self.require_ready = bool(params.pop("require_ready", True))
 
         server_cfg = {}
         nested = params.pop("llamacpp_server", None)
@@ -175,7 +212,8 @@ class LlamaCppModel:
             server_cfg["model"] = local_model
         for key in ("ngl", "np", "flash_attn", "flash-attn", "flash_attention",
                     "cont_batching", "cont-batching", "ctx_len", "c", "batch", "b",
-                    "ubatch", "ub", "extra", "ready_timeout", "show_output"):
+                    "ubatch", "ub", "extra", "ready_timeout", "show_output",
+                    "log_file", "log_path", "startup_timeout"):
             if key in params:
                 server_cfg[key] = params.pop(key)
         if "extra" in server_cfg and not isinstance(server_cfg["extra"], list):
@@ -202,7 +240,11 @@ class LlamaCppModel:
         wait_timeout = 5.0
         if any(h in self.host for h in ("localhost", "127.0.0.1", "0.0.0.0")):
             if self.autostart:
-                restart_llamacpp_server(self.host, server_cfg)
+                restart_llamacpp_server(
+                    self.host,
+                    server_cfg,
+                    timeout=float(server_cfg.get("startup_timeout", 1.5)),
+                )
             else:
                 logger.info("llama.cpp autostart disabled for %s", self.host)
             heavy = bool(server_cfg.get("hf") or server_cfg.get("model"))
@@ -219,13 +261,16 @@ class LlamaCppModel:
             for url in urls:
                 try:
                     r = requests.get(url, timeout=0.5)
-                    if r.status_code < 500:
+                    if r.status_code == 200:
                         logger.info(f"Connected to llama.cpp server at {self.host}")
                         return
                 except Exception:
                     pass
             time.sleep(0.2)
-        logger.warning(f"Could not verify llama.cpp server at {self.host}; continuing anyway")
+        message = f"Could not verify llama.cpp server at {self.host}"
+        if self.require_ready:
+            raise RuntimeError(message)
+        logger.warning(f"{message}; continuing anyway")
 
     def _prepare_common_params(self) -> dict:
         params: dict = {}
@@ -252,20 +297,20 @@ class LlamaCppModel:
         }
         payload.update(self._prepare_common_params())
         headers = {"Content-Type": "application/json"}
-        r = requests.post(url, data=json.dumps(payload), headers=headers, timeout=60)
+        r = requests.post(url, data=json.dumps(payload), headers=headers, timeout=self.request_timeout)
         r.raise_for_status()
         data = r.json()
         try:
-            return data["choices"][0]["message"]["content"]
+            return _safe_text(data["choices"][0]["message"]["content"])
         except Exception:
             # Fallback for variations
             if data.get("choices"):
                 choice = data["choices"][0]
                 if isinstance(choice, dict):
                     if "text" in choice:
-                        return choice["text"]
+                        return _safe_text(choice["text"])
                     if "message" in choice and isinstance(choice["message"], dict):
-                        return choice["message"].get("content", "")
+                        return _safe_text(choice["message"].get("content", ""))
             return ""
 
     def _completions(self, prompt: str) -> str:
@@ -277,11 +322,11 @@ class LlamaCppModel:
         }
         payload.update(self._prepare_common_params())
         headers = {"Content-Type": "application/json"}
-        r = requests.post(url, data=json.dumps(payload), headers=headers, timeout=60)
+        r = requests.post(url, data=json.dumps(payload), headers=headers, timeout=self.request_timeout)
         r.raise_for_status()
         data = r.json()
         try:
-            return data["choices"][0]["text"]
+            return _safe_text(data["choices"][0]["text"])
         except Exception:
             return ""
 
@@ -322,16 +367,16 @@ class LlamaCppModel:
         }
         payload.update(self._prepare_common_params())
         headers = {"Content-Type": "application/json"}
-        r = requests.post(url, data=json.dumps(payload), headers=headers, timeout=120)
+        r = requests.post(url, data=json.dumps(payload), headers=headers, timeout=self.request_timeout)
         if r.status_code == 404 or r.status_code == 400:
             # Try selecting default loaded model
             if self._maybe_select_default_model():
                 payload["model"] = self.model_name
-                r = requests.post(url, data=json.dumps(payload), headers=headers, timeout=120)
+                r = requests.post(url, data=json.dumps(payload), headers=headers, timeout=self.request_timeout)
         r.raise_for_status()
         data = r.json()
         try:
-            return data["choices"][0]["message"]["content"]
+            return _safe_text(data["choices"][0]["message"]["content"])
         except Exception:
             return ""
 
@@ -362,8 +407,10 @@ class LlamaCppModel:
             if text:
                 return text
         except Exception as err:
-            logger.warning(f"Vision aggregate call failed ({err}); retrying with text-only")
+            logger.warning(f"Vision aggregate call failed ({err})")
 
+        if not self.allow_text_fallback:
+            return ""
         try:
             fallback = self._chat_completions(prompt)
             if fallback:
@@ -384,7 +431,9 @@ class LlamaCppModel:
                     text = self._chat_with_vision(prompt, [img])
                     return idx_img, (text or "")
                 except Exception as err:
-                    logger.warning(f"Vision call failed ({err}); falling back to text-only")
+                    logger.warning(f"Vision call failed ({err})")
+                    if not self.allow_text_fallback:
+                        return idx_img, ""
                     try:
                         return idx_img, (self._completions(prompt) or "")
                     except Exception as err2:
@@ -421,4 +470,3 @@ class LlamaCppModel:
             except Exception as err2:
                 logger.warning(f"Completions endpoint failed ({err2}); returning empty string")
                 return ""
-

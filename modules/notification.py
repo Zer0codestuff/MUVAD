@@ -9,6 +9,21 @@ from helpers.logger import getLogger
 logger = getLogger("notifier")
 
 
+def _extract_json_object(text: str, preferred_key: str | None = None) -> dict | None:
+    decoder = json.JSONDecoder()
+    candidates: list[dict] = []
+    for match in regex.finditer(r"\{", text or ""):
+        try:
+            obj, _ = decoder.raw_decode(text[match.start():])
+        except json.JSONDecodeError:
+            continue
+        if isinstance(obj, dict):
+            if preferred_key and preferred_key in obj:
+                return obj
+            candidates.append(obj)
+    return candidates[0] if candidates else None
+
+
 class Notifier(Module):
     def __init__(self,
             responses_database: Queue[str],
@@ -84,31 +99,17 @@ class Notifier(Module):
             # Determine how many frames were included in this detector call
             frames_in_response = max(1, int(self._count_frames_in_response(response)))
 
-            # Search for one json
-            raw_json = regex.findall(r"\{[^\<\>]*?\}", response)
-            if len(raw_json) == 0:
+            # Search for a JSON object. LLMs often wrap it in markdown or add prose.
+            dict_json = _extract_json_object(response, self.result_key)
+            if dict_json is None:
                 logger.warning("JSON not found")
-                continue
-            elif len(raw_json) > 1:
-                logger.error("Too many JSON found")
-                logger.debug(f"{raw_json}")
-                continue
-            raw_json = raw_json[0]
-
-            # Parse the json
-            try:
-                dict_json: dict = json.loads(raw_json)
-            except json.JSONDecodeError as err:
-                logger.error("JSON decode error")
-                logger.error(f"{err}")
-                logger.debug(f"{raw_json}")
                 continue
 
             # Get anomaly score from json
             anomaly_score = dict_json.get(self.result_key, None)
             if anomaly_score is None:
                 logger.error(f"{self.result_key} key not found in JSON")
-                logger.debug(f"{raw_json}")
+                logger.debug(f"{dict_json}")
                 continue
 
             # Get description if available
@@ -121,6 +122,11 @@ class Notifier(Module):
             elif isinstance(anomaly_score, (float, int)):
                 try:
                     numeric_score = float(anomaly_score)
+                except Exception:
+                    numeric_score = None
+            elif isinstance(anomaly_score, str):
+                try:
+                    numeric_score = float(anomaly_score.strip())
                 except Exception:
                     numeric_score = None
             else:

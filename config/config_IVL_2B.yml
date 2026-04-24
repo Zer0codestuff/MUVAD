@@ -79,7 +79,7 @@ captioner:
     device: "cuda:0"
     backend: llamacpp
     host: localhost:8080
-    save_file: "/home/gmonni54/agenticvad/results/responses.tmp"
+    save_file: "results/responses.tmp"
     log: "INFO"
 
 detector:
@@ -90,7 +90,7 @@ detector:
     device: "cuda:0"
     backend: ollama  # options: ollama | llamacpp
     host: localhost:11111
-    save_file: "/home/gmonni54/agenticvad/results/responses.tmp"
+    save_file: "results/responses.tmp"
     log: "INFO"
 
 notifier:

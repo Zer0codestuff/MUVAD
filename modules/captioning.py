@@ -76,6 +76,7 @@ class Captioner(Module):
         self.times_in = {}
         self.times_out = {}
         self.frames_captioned_count: int = 0
+        self.max_retries = int(kwargs.get("max_retries", 8))
 
         # Set random seed
         if random_seed is not None:
@@ -96,7 +97,10 @@ class Captioner(Module):
 
         # Check save file
         if self.save_file:
-            open(self.save_file, "w").close()
+            save_dir = os.path.dirname(self.save_file)
+            if save_dir:
+                os.makedirs(save_dir, exist_ok=True)
+            open(self.save_file, "w", encoding="utf-8", errors="replace").close()
 
         # Warm up backend (avoid losing first frames when llama.cpp is still loading)
         try:
@@ -125,7 +129,7 @@ class Captioner(Module):
         # Generate captions
         captions: list[str] = []
         retries = 0
-        max_retries = 8
+        max_retries = max(1, self.max_retries)
         aggregate_response: str = ""
         if self.aggregate_outputs:
             while True:
@@ -136,6 +140,8 @@ class Captioner(Module):
                 if retries >= max_retries:
                     break
                 time.sleep(0.5)
+            if not aggregate_response and self._backend.startswith("llama"):
+                raise RuntimeError("llama.cpp captioner returned an empty aggregate response")
             results = [self._format_aggregate_output(batch, aggregate_response)]
         else:
             while True:
@@ -148,6 +154,12 @@ class Captioner(Module):
                     # Give up to avoid infinite loop; return whatever we got
                     break
                 time.sleep(0.5)
+            if self._backend.startswith("llama") and (
+                not isinstance(captions, list)
+                or len(captions) != len(batch)
+                or not all((c or "").strip() for c in captions)
+            ):
+                raise RuntimeError("llama.cpp captioner returned incomplete per-frame responses")
 
             # Add timestamps
             results = [f"- {frame.timestamp}: {caption}" for caption, frame in zip(captions, batch)]
@@ -164,7 +176,7 @@ class Captioner(Module):
 
         # Save outputs in file
         if self.save_file:
-            with open(self.save_file, "a") as save_file:
+            with open(self.save_file, "a", encoding="utf-8", errors="replace") as save_file:
                 for caption in results:
                     save_file.write(f"{caption}\n")
 
@@ -177,7 +189,8 @@ class Captioner(Module):
             if hasattr(self.model, "generate_aggregate"):
                 return str(self.model.generate_aggregate(prompt, images) or "")
             response = self.model.generate(prompt, images)
-        except Exception:
+        except Exception as err:
+            logger.warning(f"Caption generation failed: {err}")
             return ""
 
         if isinstance(response, list):
