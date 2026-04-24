@@ -15,7 +15,7 @@ class Module:
         """Architecture module that get an object from queue_in, execute target, and push the returned object into queue_out"""
 
         assert batch_size >= 0
-        assert timeout > 0
+        assert timeout >= 0
 
         # Initialize object variables
         self.target = target
@@ -88,7 +88,8 @@ class Module:
                 
                 # If not queue_in, timeout
                 else:
-                    time.sleep(self.timeout)
+                    if self.timeout > 0:
+                        time.sleep(self.timeout)
 
                 # Execute target function
                 results = self.target(cache[:self.batch_size])

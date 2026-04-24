@@ -697,6 +697,8 @@ def _build_async_pipeline_config(
     output_dir = run_dir / "output"
     select_fps = 2.0
     selector_stride = max(1, int(round(float(video_fps or 30.0) / select_fps)))
+    normalized_llama_url = _normalize_llama_host(llama_url)
+    server_already_running = _is_server_running(normalized_llama_url)
 
     captioner_params = dict(config.get("captioner", {}).get("parameters", {}) or {})
     captioner_params.update({
@@ -707,7 +709,7 @@ def _build_async_pipeline_config(
         "ngl": captioner_params.get("ngl", 999),
         "ctx_len": captioner_params.get("ctx_len", 8192),
         "np": captioner_params.get("np", 1),
-        "autostart": bool(autostart_server),
+        "autostart": bool(autostart_server) and not server_already_running,
         "ready_timeout": 300.0 if autostart_server else 20.0,
     })
 
@@ -716,7 +718,7 @@ def _build_async_pipeline_config(
         "extractor": {
             **config.get("extractor", {}),
             "video_url": str(video_path),
-            "timeout": 0.001,
+            "timeout": 0.0,
             "resize": [448, 448],
             "save_dir": "",
             "log": "INFO",
@@ -739,7 +741,7 @@ def _build_async_pipeline_config(
             "aggregate_timestamp_joiner": ", ",
             "parameters": captioner_params,
             "backend": "llamacpp",
-            "host": _normalize_llama_host(llama_url),
+            "host": normalized_llama_url,
             "save_file": str(output_dir / "captioner.txt"),
             "log": "INFO",
         },
@@ -813,6 +815,7 @@ def _run_video_processing(
     yield f"Run directory: {run_dir}\n"
     yield "Pipeline: async main workflow (Extractor -> Selector -> Captioner -> Detector -> Notifier)\n"
     yield f"Video FPS: {video_fps:.2f} | Frames: {video_frame_count} | Duration: {video_total_s:.2f}s\n"
+    yield "Extractor pacing: disabled (processing as fast as decoding/model inference allow)\n"
     if autostart_server:
         yield "Autostart server: enabled\n\n"
     else:
@@ -850,7 +853,7 @@ def _run_video_processing(
             kind, payload = status_queue.get(timeout=0.5)
         except queue.Empty:
             now = time.time()
-            if now - last_progress >= 2.0:
+            if now - last_progress >= 10.0:
                 selected_count = len(list(frames_selected_dir.glob("frame_*.*")))
                 captioner_path = output_dir / "captioner.txt"
                 window_count = 0
