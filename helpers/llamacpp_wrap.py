@@ -80,7 +80,7 @@ def restart_llamacpp_server(host: str, server_cfg: dict | None = None, timeout: 
         if "--port" not in cmd and "-p" not in cmd:
             cmd += ["--port", str(port)]
     else:
-        cmd = ["llama-server", "--port", str(port)]
+        cmd = [os.environ.get("MUVAD_LLAMA_SERVER_CMD", "llama-server"), "--port", str(port)]
 
     if not explicit_cmd and model_path:
         cmd += ["-m", str(model_path)]
@@ -100,7 +100,8 @@ def restart_llamacpp_server(host: str, server_cfg: dict | None = None, timeout: 
     if not explicit_cmd and cont_batching:
         cmd += ["--cont-batching"]
     if not explicit_cmd and flash_attn:
-        cmd += ["--flash-attn"]
+        flash_value = "on" if flash_attn is True else str(flash_attn)
+        cmd += ["--flash-attn", flash_value]
     if not explicit_cmd and batch_size is not None:
         cmd += ["-b", str(batch_size)]
     if not explicit_cmd and ubatch_size is not None:
@@ -199,6 +200,15 @@ class LlamaCppModel:
         self.request_timeout = float(params.pop("request_timeout", 120.0))
         self.allow_text_fallback = bool(params.pop("allow_text_fallback", False))
         self.require_ready = bool(params.pop("require_ready", True))
+        self.image_format = str(params.pop("image_format", "JPEG") or "JPEG").upper()
+        if self.image_format == "JPG":
+            self.image_format = "JPEG"
+        if self.image_format not in {"JPEG", "PNG", "WEBP"}:
+            self.image_format = "JPEG"
+        try:
+            self.image_quality = max(1, min(100, int(params.pop("image_quality", 85))))
+        except Exception:
+            self.image_quality = 85
 
         server_cfg = {}
         nested = params.pop("llamacpp_server", None)
@@ -344,12 +354,19 @@ class LlamaCppModel:
                     return None
             elif hasattr(img, "save"):
                 buf = io.BytesIO()
-                img.save(buf, format="PNG")
+                image_format = self.image_format
+                mime_subtype = "jpeg" if image_format == "JPEG" else image_format.lower()
+                save_kwargs = {}
+                if image_format in {"JPEG", "WEBP"}:
+                    save_kwargs["quality"] = self.image_quality
+                img.convert("RGB").save(buf, format=image_format, **save_kwargs)
                 b = buf.getvalue()
             else:
                 return None
             b64 = base64.b64encode(b).decode("utf-8")
-            return f"data:image/png;base64,{b64}"
+            if "mime_subtype" not in locals():
+                mime_subtype = "png"
+            return f"data:image/{mime_subtype};base64,{b64}"
         except Exception:
             return None
 

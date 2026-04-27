@@ -37,6 +37,13 @@ class Selector(Module):
         self.save_dir = os.path.expanduser(save_dir)
         self.times_out = {}
         self.frames_selected_count = 0
+        self.save_ext = str(kwargs.get("save_ext", "png") or "png").lower().lstrip(".")
+        if self.save_ext not in {"png", "jpg", "jpeg", "webp"}:
+            self.save_ext = "png"
+        try:
+            self.jpeg_quality = max(1, min(100, int(kwargs.get("jpeg_quality", 85))))
+        except Exception:
+            self.jpeg_quality = 85
         
         # Check save directory
         if self.save_dir:
@@ -67,7 +74,13 @@ class Selector(Module):
 
         # Save frame in save_dir
         if self.save_dir:
-            selected_frame.image.save(os.path.join(self.save_dir, f"frame_{selected_frame.timestamp}.png"))
+            save_path = os.path.join(self.save_dir, f"frame_{selected_frame.timestamp}.{self.save_ext}")
+            if self.save_ext in {"jpg", "jpeg"}:
+                selected_frame.image.convert("RGB").save(save_path, quality=self.jpeg_quality, optimize=False)
+            elif self.save_ext == "webp":
+                selected_frame.image.convert("RGB").save(save_path, quality=self.jpeg_quality, method=0)
+            else:
+                selected_frame.image.save(save_path)
 
         self.times_out[selected_frame.timestamp] = time.time()
         try:

@@ -5,6 +5,8 @@ from __future__ import annotations
 
 import argparse
 import csv
+import hashlib
+import html
 import json
 import os
 import queue
@@ -14,6 +16,7 @@ import subprocess
 import sys
 import threading
 import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
 from math import ceil
 from pathlib import Path
@@ -39,6 +42,7 @@ EVALUATIONS_FILE = _resolve_runtime_path(
     os.environ.get("MUVAD_EVALUATIONS_FILE", REPO_ROOT / "tmp" / "vad_evaluations.json")
 )
 VIDEO_EXTENSIONS = (".mp4", ".avi", ".mov", ".mkv", ".wmv", ".flv", ".webm")
+MAX_RUNTIME_STEM_LENGTH = 80
 
 try:
     import gradio as gr
@@ -221,9 +225,14 @@ DEFAULT_LLM_MODEL = "unsloth/InternVL3-2B-GGUF:UD-Q4_K_XL"
 DEFAULT_LLAMA_CTX_LEN = 8192
 DEFAULT_LLAMA_BATCH = 1024
 DEFAULT_LLAMA_UBATCH = 256
-DEFAULT_LLAMA_PARALLEL = 1
+DEFAULT_LLAMA_PARALLEL = 2
 DEFAULT_ANALYSIS_FPS = 2.0
 DEFAULT_CHUNK_SECONDS = 600
+DEFAULT_CAPTION_WINDOW_SIZE = 6
+DEFAULT_CAPTION_PARALLEL_WINDOWS = 2
+DEFAULT_CHUNK_WORKERS = 1
+DEFAULT_FRAME_SAVE_EXT = "jpg"
+DEFAULT_IMAGE_QUALITY = 85
 
 # Cache for summaries (run_name -> summary)
 _summary_cache: Dict[str, str] = {}
@@ -255,6 +264,21 @@ def _env_float(name: str, default: float) -> float:
     return value if value > 0 else default
 
 
+def _env_bool(name: str, default: bool = False) -> bool:
+    raw = os.environ.get(name)
+    if raw is None:
+        return default
+    return raw.strip().lower() in {"1", "true", "yes", "on", "y"}
+
+
+def _env_choice(name: str, default: str, choices: set[str]) -> str:
+    raw = os.environ.get(name)
+    if raw is None:
+        return default
+    value = raw.strip().lower().lstrip(".")
+    return value if value in choices else default
+
+
 def _is_server_running(url: str = DEFAULT_LLM_URL) -> bool:
     """Check if the LLM server is running."""
     try:
@@ -274,7 +298,7 @@ def _start_llama_server(
     port: int = 8080,
     ngl: int = 999,
     ctx_len: int = DEFAULT_LLAMA_CTX_LEN,
-    server_bin: str = "llama-server",
+    server_bin: Optional[str] = None,
 ) -> bool:
     """Start llama-server if not already running. Uses -hf flag to download from HuggingFace."""
     global _llama_server_process, _server_started
@@ -284,10 +308,13 @@ def _start_llama_server(
         return True
     
     print(f"[LLM Server] Starting llama-server with model: {model_name}")
+    server_bin = server_bin or os.environ.get("MUVAD_LLAMA_SERVER_CMD", "llama-server")
     ctx_len = _env_int("MUVAD_LLAMA_CTX_LEN", int(ctx_len))
     parallel_slots = _env_int("MUVAD_LLAMA_NP", DEFAULT_LLAMA_PARALLEL)
     batch_size = _env_int("MUVAD_LLAMA_BATCH", DEFAULT_LLAMA_BATCH)
     ubatch_size = _env_int("MUVAD_LLAMA_UBATCH", DEFAULT_LLAMA_UBATCH)
+    cont_batching = _env_bool("MUVAD_LLAMA_CONT_BATCHING", True)
+    flash_attn = _env_bool("MUVAD_LLAMA_FLASH_ATTN", True)
     
     # Create log file
     log_path = REPO_ROOT / "tmp" / "llama_server_summary.log"
@@ -305,6 +332,10 @@ def _start_llama_server(
             "-ub", str(ubatch_size),
             "--host", "0.0.0.0",
         ]
+        if cont_batching:
+            cmd.append("--cont-batching")
+        if flash_attn:
+            cmd += ["--flash-attn", "on"]
         
         print(f"[LLM Server] Command: {' '.join(cmd)}")
         print(f"[LLM Server] Log file: {log_path}")
@@ -524,12 +555,29 @@ def _get_unprocessed_videos() -> List[Tuple[str, Path]]:
     return unprocessed
 
 
+def _safe_runtime_stem(value: str, max_length: int = MAX_RUNTIME_STEM_LENGTH) -> str:
+    stem = re.sub(r"[^A-Za-z0-9._-]+", "_", str(value or "").strip())
+    stem = re.sub(r"_+", "_", stem).strip("._-")
+    if not stem:
+        stem = "video"
+    if len(stem) <= max_length:
+        return stem
+    digest = hashlib.sha1(str(value).encode("utf-8", errors="replace")).hexdigest()[:10]
+    return f"{stem[: max_length - 11].rstrip('._-')}_{digest}"
+
+
+def _safe_runtime_filename(path: Path) -> str:
+    suffix = path.suffix if path.suffix.lower() in VIDEO_EXTENSIONS else ".mp4"
+    return f"{_safe_runtime_stem(path.stem)}{suffix}"
+
+
 def _next_run_dir(video_stem: str) -> Path:
     """Allocate a run directory name without collisions."""
-    run_dir = RUNS_DIR / video_stem
+    safe_stem = _safe_runtime_stem(video_stem)
+    run_dir = RUNS_DIR / safe_stem
     if run_dir.exists():
         timestamp = time.strftime("%Y%m%d_%H%M%S")
-        run_dir = RUNS_DIR / f"{video_stem}_{timestamp}"
+        run_dir = RUNS_DIR / f"{safe_stem}_{timestamp}"
     return run_dir
 
 
@@ -723,6 +771,14 @@ def _build_async_pipeline_config(
     video_fps: float,
     start_time: float = 0.0,
     end_time: Optional[float] = None,
+    llama_parallel_slots: Optional[int] = None,
+    caption_parallel_windows: Optional[int] = None,
+    llama_ctx_len: Optional[int] = None,
+    llama_batch_size: Optional[int] = None,
+    llama_ubatch_size: Optional[int] = None,
+    caption_window_size: Optional[int] = None,
+    llama_flash_attn: Optional[bool] = None,
+    llama_cont_batching: Optional[bool] = None,
 ) -> Dict[str, Any]:
     from scripts.prediction.workflow import read_config
 
@@ -738,10 +794,22 @@ def _build_async_pipeline_config(
     server_already_running = _is_server_running(normalized_llama_url)
 
     captioner_params = dict(config.get("captioner", {}).get("parameters", {}) or {})
-    ctx_len = _env_int("MUVAD_LLAMA_CTX_LEN", DEFAULT_LLAMA_CTX_LEN)
-    batch_size = _env_int("MUVAD_LLAMA_BATCH", DEFAULT_LLAMA_BATCH)
-    ubatch_size = _env_int("MUVAD_LLAMA_UBATCH", DEFAULT_LLAMA_UBATCH)
-    parallel_slots = _env_int("MUVAD_LLAMA_NP", DEFAULT_LLAMA_PARALLEL)
+    ctx_len = int(llama_ctx_len) if llama_ctx_len else _env_int("MUVAD_LLAMA_CTX_LEN", DEFAULT_LLAMA_CTX_LEN)
+    batch_size = int(llama_batch_size) if llama_batch_size else _env_int("MUVAD_LLAMA_BATCH", DEFAULT_LLAMA_BATCH)
+    ubatch_size = int(llama_ubatch_size) if llama_ubatch_size else _env_int("MUVAD_LLAMA_UBATCH", DEFAULT_LLAMA_UBATCH)
+    parallel_slots = int(llama_parallel_slots) if llama_parallel_slots else _env_int("MUVAD_LLAMA_NP", DEFAULT_LLAMA_PARALLEL)
+    caption_window_size = int(caption_window_size) if caption_window_size else _env_int("MUVAD_CAPTION_WINDOW_SIZE", DEFAULT_CAPTION_WINDOW_SIZE)
+    parallel_windows = int(caption_parallel_windows) if caption_parallel_windows else _env_int("MUVAD_CAPTION_PARALLEL_WINDOWS", DEFAULT_CAPTION_PARALLEL_WINDOWS)
+    flash_attn = _env_bool("MUVAD_LLAMA_FLASH_ATTN", True) if llama_flash_attn is None else bool(llama_flash_attn)
+    cont_batching = _env_bool("MUVAD_LLAMA_CONT_BATCHING", True) if llama_cont_batching is None else bool(llama_cont_batching)
+    ctx_len = max(1024, ctx_len)
+    batch_size = max(1, batch_size)
+    ubatch_size = max(1, ubatch_size)
+    parallel_slots = max(1, parallel_slots)
+    caption_window_size = max(1, caption_window_size)
+    parallel_windows = max(1, parallel_windows)
+    frame_save_ext = _env_choice("MUVAD_FRAME_SAVE_EXT", DEFAULT_FRAME_SAVE_EXT, {"png", "jpg", "jpeg", "webp"})
+    image_quality = _env_int("MUVAD_IMAGE_QUALITY", DEFAULT_IMAGE_QUALITY)
 
     # The base config is tuned for large offline runs (np=10, ctx_len=81920).
     # The Gradio demo runs one request stream and should not inherit those VRAM-heavy defaults.
@@ -749,14 +817,18 @@ def _build_async_pipeline_config(
         "max_tokens": 512,
         "temperature": 0.0,
         "top_p": 0.0,
-        "cont_batching": False,
+        "cont_batching": cont_batching,
+        "flash_attn": flash_attn,
         "ngl": captioner_params.get("ngl", 999),
         "ctx_len": ctx_len,
         "batch": batch_size,
         "ubatch": ubatch_size,
         "np": parallel_slots,
+        "image_format": frame_save_ext.upper().replace("JPG", "JPEG"),
+        "image_quality": image_quality,
         "autostart": bool(autostart_server) and not server_already_running,
         "ready_timeout": 300.0 if autostart_server else 20.0,
+        "log_file": str(output_dir / "llama_server.log"),
     })
 
     return {
@@ -776,16 +848,20 @@ def _build_async_pipeline_config(
             **config.get("selector", {}),
             "batch_size": 1,
             "save_dir": str(run_dir / "frames_selected"),
+            "save_ext": frame_save_ext,
+            "jpeg_quality": image_quality,
             "log": "INFO",
         },
         "captioner": {
             **config.get("captioner", {}),
             "model_name": llama_model,
             "prompt": prompt,
-            "batch_size": 6,
+            "batch_size": caption_window_size * parallel_windows,
             "warmup_timeout": 20,
             "random_seed": 1337,
             "aggregate": True,
+            "aggregate_window_size": caption_window_size,
+            "aggregate_max_workers": parallel_windows,
             "aggregate_frames_tag": "FramesCount",
             "aggregate_timestamp_joiner": ", ",
             "parameters": captioner_params,
@@ -1013,6 +1089,15 @@ def _run_video_processing(
     prompt: str,
     autostart_server: bool = True,
     run_dir: Optional[Path] = None,
+    llama_parallel_slots: Optional[int] = None,
+    caption_parallel_windows: Optional[int] = None,
+    llama_ctx_len: Optional[int] = None,
+    llama_batch_size: Optional[int] = None,
+    llama_ubatch_size: Optional[int] = None,
+    caption_window_size: Optional[int] = None,
+    llama_flash_attn: Optional[bool] = None,
+    llama_cont_batching: Optional[bool] = None,
+    chunk_workers_override: Optional[int] = None,
 ) -> Iterator[str]:
     """Run the VAD pipeline on a video and yield log output."""
     if not video_path:
@@ -1024,7 +1109,7 @@ def _run_video_processing(
         yield f"Error: Video not found: {video_path}"
         return
 
-    video_stem = video.stem
+    video_stem = _safe_runtime_stem(video.stem)
     run_dir = run_dir or _next_run_dir(video_stem)
     run_dir.mkdir(parents=True, exist_ok=True)
 
@@ -1034,12 +1119,18 @@ def _run_video_processing(
     for directory in (videos_dir, output_dir, frames_selected_dir):
         directory.mkdir(parents=True, exist_ok=True)
 
-    dest_video = videos_dir / video.name
+    dest_video = videos_dir / _safe_runtime_filename(video)
     if dest_video.resolve() != video.resolve():
-        shutil.copy2(video, dest_video)
+        try:
+            shutil.copy2(video, dest_video)
+        except OSError as exc:
+            yield f"Error: could not stage video for processing: {exc}\n"
+            return
 
     video_fps, video_total_s, video_frame_count = _read_video_metadata(dest_video)
     chunk_seconds = _env_int("MUVAD_CHUNK_SECONDS", DEFAULT_CHUNK_SECONDS)
+    chunk_workers = int(chunk_workers_override) if chunk_workers_override else _env_int("MUVAD_CHUNK_WORKERS", DEFAULT_CHUNK_WORKERS)
+    chunk_workers = max(1, chunk_workers)
     chunks = _chunk_ranges(video_total_s, chunk_seconds)
     analysis_fps = _env_float("MUVAD_ANALYSIS_FPS", DEFAULT_ANALYSIS_FPS)
     frame_stride = max(1, int(round(float(video_fps or 30.0) / analysis_fps)))
@@ -1051,6 +1142,14 @@ def _run_video_processing(
         prompt=prompt,
         autostart_server=autostart_server,
         video_fps=video_fps,
+        llama_parallel_slots=llama_parallel_slots,
+        caption_parallel_windows=caption_parallel_windows,
+        llama_ctx_len=llama_ctx_len,
+        llama_batch_size=llama_batch_size,
+        llama_ubatch_size=llama_ubatch_size,
+        caption_window_size=caption_window_size,
+        llama_flash_attn=llama_flash_attn,
+        llama_cont_batching=llama_cont_batching,
     )
 
     yield f"Starting processing: {video.name}\n"
@@ -1060,16 +1159,27 @@ def _run_video_processing(
     yield f"Extractor sampling: target_fps={analysis_fps:g}, frame_stride={frame_stride} (skips frames before decoding to PIL)\n"
     if len(chunks) > 1:
         yield f"Chunking: enabled, {len(chunks)} chunks of up to {chunk_seconds}s; completed chunks are reused on resume.\n"
+        yield f"Chunk workers: {chunk_workers} (set MUVAD_CHUNK_WORKERS to tune; 1 keeps real-time per-window logs)\n"
     else:
         yield "Chunking: disabled for this video length.\n"
     llama_params = preview_config["captioner"]["parameters"]
+    caption_cfg = preview_config["captioner"]
     yield (
         "llama.cpp memory settings: "
         f"np={llama_params.get('np')}, "
         f"ctx_len={llama_params.get('ctx_len')}, "
         f"batch={llama_params.get('batch')}, "
         f"ubatch={llama_params.get('ubatch')}, "
-        f"cont_batching={llama_params.get('cont_batching')}\n"
+        f"cont_batching={llama_params.get('cont_batching')}, "
+        f"flash_attn={llama_params.get('flash_attn')}\n"
+    )
+    yield (
+        "Caption throughput settings: "
+        f"window_size={caption_cfg.get('aggregate_window_size')}, "
+        f"parallel_windows={caption_cfg.get('aggregate_max_workers')}, "
+        f"captioner_batch_size={caption_cfg.get('batch_size')}, "
+        f"image_format={llama_params.get('image_format')}, "
+        f"image_quality={llama_params.get('image_quality')}\n"
     )
     if _is_server_running(_normalize_llama_host(llama_url)):
         yield "llama.cpp server: already running; restart it to apply changed startup settings if it was launched with older values.\n"
@@ -1081,6 +1191,118 @@ def _run_video_processing(
     accumulated = ""
     final_json_path: Optional[Path] = None
     any_anomalous = False
+
+    def process_chunk_sync(chunk: Tuple[int, float, float], allow_autostart: bool = False) -> Tuple[int, bool, Path, bool]:
+        chunk_idx, start_time, end_time = chunk
+        active_run_dir = _chunk_run_dir(run_dir, chunk_idx)
+        active_run_dir.mkdir(parents=True, exist_ok=True)
+        for directory in (active_run_dir / "output", active_run_dir / "frames_selected"):
+            directory.mkdir(parents=True, exist_ok=True)
+
+        existing_chunk_json = _chunk_inference_path(active_run_dir)
+        if existing_chunk_json is not None:
+            return chunk_idx, False, existing_chunk_json, True
+
+        config = _build_async_pipeline_config(
+            video_path=dest_video,
+            run_dir=active_run_dir,
+            llama_url=llama_url,
+            llama_model=llama_model,
+            prompt=prompt,
+            autostart_server=allow_autostart,
+            video_fps=video_fps,
+            start_time=start_time,
+            end_time=end_time if video_total_s > 0 else None,
+            llama_parallel_slots=llama_parallel_slots,
+            caption_parallel_windows=caption_parallel_windows,
+            llama_ctx_len=llama_ctx_len,
+            llama_batch_size=llama_batch_size,
+            llama_ubatch_size=llama_ubatch_size,
+            caption_window_size=caption_window_size,
+            llama_flash_attn=llama_flash_attn,
+            llama_cont_batching=llama_cont_batching,
+        )
+        from scripts.prediction.workflow import initialize_modules, workflow
+
+        modules = initialize_modules(config)
+        result = bool(workflow(*modules, config))
+        json_path = _save_async_inference_data(
+            run_dir=active_run_dir,
+            video_name=video_stem,
+            prompt=prompt,
+            threshold=float(config["notifier"]["threshold"]),
+            window_step=int(config["captioner"]["aggregate_window_size"]),
+            video_total_s=video_total_s,
+        )
+        return chunk_idx, result, json_path, False
+
+    if len(chunks) > 1 and chunk_workers > 1:
+        accumulated += f"Parallel chunk processing enabled with {chunk_workers} workers.\n"
+        yield accumulated
+
+        pending_chunks = list(chunks)
+        if autostart_server and not _is_server_running(_normalize_llama_host(llama_url)):
+            first_chunk = pending_chunks.pop(0)
+            accumulated += "Starting first chunk alone to warm up llama.cpp before parallel workers...\n"
+            yield accumulated
+            try:
+                chunk_idx, result, json_path, skipped = process_chunk_sync(first_chunk, allow_autostart=True)
+            except Exception as exc:
+                accumulated += f"\nProcessing failed: {exc}\n"
+                yield accumulated
+                return
+            any_anomalous = any_anomalous or bool(result)
+            final_json_path = _merge_chunk_results(
+                run_dir=run_dir,
+                video_name=video_stem,
+                prompt=prompt,
+                threshold=float(preview_config["notifier"]["threshold"]),
+                window_step=int(preview_config["captioner"]["aggregate_window_size"]),
+                video_total_s=video_total_s,
+            )
+            accumulated += f"Chunk {chunk_idx + 1}/{len(chunks)}: {'already processed' if skipped else 'complete'} ({json_path})\n"
+            yield accumulated
+
+        with ThreadPoolExecutor(max_workers=min(chunk_workers, len(pending_chunks))) as executor:
+            futures = {executor.submit(process_chunk_sync, chunk): chunk for chunk in pending_chunks}
+            for future in as_completed(futures):
+                try:
+                    chunk_idx, result, json_path, skipped = future.result()
+                except Exception as exc:
+                    accumulated += f"\nProcessing failed: {exc}\n"
+                    yield accumulated
+                    return
+                any_anomalous = any_anomalous or bool(result)
+                final_json_path = _merge_chunk_results(
+                    run_dir=run_dir,
+                    video_name=video_stem,
+                    prompt=prompt,
+                    threshold=float(preview_config["notifier"]["threshold"]),
+                    window_step=int(preview_config["captioner"]["aggregate_window_size"]),
+                    video_total_s=video_total_s,
+                )
+                data = _load_run_inference_data(run_dir)
+                windows_count = len(data.get("windows", [])) if data else 0
+                selected_count = len(data.get("selected_frames", [])) if data else len(list(frames_selected_dir.glob("frame_*.*")))
+                accumulated += f"Chunk {chunk_idx + 1}/{len(chunks)}: {'already processed' if skipped else 'complete'} ({json_path})\n"
+                accumulated += f"Merged progress: selected frames={selected_count} | analysis windows={windows_count}\n"
+                yield accumulated
+
+        data = _load_run_inference_data(run_dir)
+        if data:
+            any_anomalous = any(
+                bool(window.get("is_anomalous")) or float(window.get("anomaly_score", 0.0)) >= float(data.get("threshold", 0.5))
+                for window in data.get("windows", [])
+            )
+            accumulated += "\nProcessing complete!\n"
+            accumulated += f"Prediction: {'anomalous' if any_anomalous else 'normal'}\n"
+            accumulated += f"Selected frames: {len(data.get('selected_frames', []))} | Analysis windows: {len(data.get('windows', []))}\n"
+            if final_json_path:
+                accumulated += f"Inference data saved to: {final_json_path}\n"
+        else:
+            accumulated += "\nProcessing complete, but no inference data was generated.\n"
+        yield accumulated
+        return
 
     for chunk_idx, start_time, end_time in chunks:
         chunked = len(chunks) > 1
@@ -1100,10 +1322,10 @@ def _run_video_processing(
             accumulated += f"{chunk_label}: already processed, skipping.\n"
             final_json_path = _merge_chunk_results(
                 run_dir=run_dir,
-                video_name=video.stem,
+                video_name=video_stem,
                 prompt=prompt,
                 threshold=float(preview_config["notifier"]["threshold"]),
-                window_step=int(preview_config["captioner"]["batch_size"]),
+                window_step=int(preview_config["captioner"]["aggregate_window_size"]),
                 video_total_s=video_total_s,
             )
             yield accumulated
@@ -1119,6 +1341,14 @@ def _run_video_processing(
             video_fps=video_fps,
             start_time=start_time,
             end_time=end_time if video_total_s > 0 else None,
+            llama_parallel_slots=llama_parallel_slots,
+            caption_parallel_windows=caption_parallel_windows,
+            llama_ctx_len=llama_ctx_len,
+            llama_batch_size=llama_batch_size,
+            llama_ubatch_size=llama_ubatch_size,
+            caption_window_size=caption_window_size,
+            llama_flash_attn=llama_flash_attn,
+            llama_cont_batching=llama_cont_batching,
         )
 
         status_queue: queue.Queue[Tuple[str, Any]] = queue.Queue()
@@ -1133,10 +1363,10 @@ def _run_video_processing(
                 result = bool(workflow(*modules, config))
                 json_path = _save_async_inference_data(
                     run_dir=active_run_dir,
-                    video_name=video.stem,
+                    video_name=video_stem,
                     prompt=prompt,
                     threshold=float(config["notifier"]["threshold"]),
-                    window_step=int(config["captioner"]["batch_size"]),
+                    window_step=int(config["captioner"]["aggregate_window_size"]),
                     video_total_s=video_total_s,
                 )
                 status_queue.put(("done", (result, json_path)))
@@ -1192,10 +1422,10 @@ def _run_video_processing(
                 if chunked:
                     final_json_path = _merge_chunk_results(
                         run_dir=run_dir,
-                        video_name=video.stem,
+                        video_name=video_stem,
                         prompt=prompt,
                         threshold=float(config["notifier"]["threshold"]),
-                        window_step=int(config["captioner"]["batch_size"]),
+                        window_step=int(config["captioner"]["aggregate_window_size"]),
                         video_total_s=video_total_s,
                     )
                     merged_data = _load_run_inference_data(run_dir)
@@ -1228,10 +1458,10 @@ def _run_video_processing(
     if len(chunks) > 1:
         final_json_path = final_json_path or _merge_chunk_results(
             run_dir=run_dir,
-            video_name=video.stem,
+            video_name=video_stem,
             prompt=prompt,
             threshold=float(preview_config["notifier"]["threshold"]),
-            window_step=int(preview_config["captioner"]["batch_size"]),
+            window_step=int(preview_config["captioner"]["aggregate_window_size"]),
             video_total_s=video_total_s,
         )
         data = _load_run_inference_data(run_dir)
@@ -1643,6 +1873,191 @@ def _build_anomaly_summary(
     return _build_anomaly_summary_html(windows, threshold, run_name, use_llm, lang)
 
 
+def _format_seconds(seconds: Any) -> str:
+    try:
+        value = max(0.0, float(seconds))
+    except (TypeError, ValueError):
+        value = 0.0
+    minutes = int(value // 60)
+    remaining = value - (minutes * 60)
+    if minutes:
+        return f"{minutes}m {remaining:04.1f}s"
+    return f"{remaining:.1f}s"
+
+
+def _score_style(score: float, threshold: float) -> Tuple[str, str]:
+    if score >= threshold:
+        return "#b42318", "#fee4e2"
+    if score >= threshold * 0.75:
+        return "#b54708", "#fef0c7"
+    return "#027a48", "#dcfae6"
+
+
+def _build_window_detail_html(
+    window: Dict[str, Any],
+    windows: List[Dict[str, Any]],
+    window_idx: int,
+    threshold: float,
+    *,
+    description: str = "",
+    lang: str = "en",
+) -> str:
+    labels = {
+        "en": {
+            "current_window": "Current Window",
+            "score": "Score",
+            "threshold": "Threshold",
+            "status": "Status",
+            "anomalous": "Anomalous",
+            "normal": "Normal",
+            "time_range": "Time Range",
+            "duration": "Duration",
+            "trend": "Trend",
+            "rank": "Score Rank",
+            "frames": "Frames",
+            "model_description": "Model Description",
+            "no_description": "No description returned for this window.",
+            "prev": "prev",
+            "next": "next",
+            "above": "above threshold",
+            "below": "below threshold",
+            "stable": "stable",
+        },
+        "it": {
+            "current_window": "Finestra Corrente",
+            "score": "Punteggio",
+            "threshold": "Soglia",
+            "status": "Stato",
+            "anomalous": "Anomala",
+            "normal": "Normale",
+            "time_range": "Intervallo",
+            "duration": "Durata",
+            "trend": "Trend",
+            "rank": "Posizione Score",
+            "frames": "Frame",
+            "model_description": "Descrizione del modello",
+            "no_description": "Nessuna descrizione restituita per questa finestra.",
+            "prev": "prec",
+            "next": "succ",
+            "above": "sopra soglia",
+            "below": "sotto soglia",
+            "stable": "stabile",
+        },
+    }
+    lbl = labels.get(lang, labels["en"])
+
+    try:
+        idx = max(0, min(int(window_idx), len(windows) - 1))
+    except Exception:
+        idx = 0
+    try:
+        score = float(window.get("anomaly_score", 0.0) or 0.0)
+    except (TypeError, ValueError):
+        score = 0.0
+    score = max(0.0, min(1.0, score))
+    try:
+        threshold_value = float(threshold)
+    except (TypeError, ValueError):
+        threshold_value = 0.5
+
+    start_ts = float(window.get("timestamp_start", window.get("timestamp_center", 0.0)) or 0.0)
+    center_ts = float(window.get("timestamp_center", start_ts) or start_ts)
+    end_ts = float(window.get("timestamp_end", center_ts) or center_ts)
+    duration = max(0.0, end_ts - start_ts)
+    frame_names = [str(name) for name in window.get("frame_names", [])]
+    frame_count = len(frame_names)
+    is_anomalous = bool(window.get("is_anomalous")) or score >= threshold_value
+    status_text = lbl["anomalous"] if is_anomalous else lbl["normal"]
+    margin_text = lbl["above"] if score >= threshold_value else lbl["below"]
+    score_color, score_bg = _score_style(score, threshold_value)
+
+    prev_score = None
+    if idx > 0:
+        try:
+            prev_score = float(windows[idx - 1].get("anomaly_score", 0.0) or 0.0)
+        except (TypeError, ValueError):
+            prev_score = None
+    if prev_score is None:
+        trend_text = "-"
+        trend_color = "#475467"
+    else:
+        delta = score - prev_score
+        if abs(delta) < 0.03:
+            trend_text = lbl["stable"]
+            trend_color = "#475467"
+        else:
+            sign = "+" if delta > 0 else ""
+            trend_text = f"{sign}{delta:.2f} vs {lbl['prev']}"
+            trend_color = "#b42318" if delta > 0 else "#027a48"
+
+    sorted_scores = sorted(
+        (float(w.get("anomaly_score", 0.0) or 0.0) for w in windows),
+        reverse=True,
+    )
+    rank = (sorted_scores.index(score) + 1) if score in sorted_scores else idx + 1
+    frame_preview = " - ".join(html.escape(name) for name in frame_names[:1] + frame_names[-1:] if name)
+    if frame_count == 1:
+        frame_preview = html.escape(frame_names[0])
+    if not frame_preview:
+        frame_preview = "-"
+
+    prev_badge = ""
+    next_badge = ""
+    if idx > 0:
+        prev = float(windows[idx - 1].get("anomaly_score", 0.0) or 0.0)
+        prev_badge = f"<span style='color:#667085;'> {lbl['prev']}: {prev:.2f}</span>"
+    if idx + 1 < len(windows):
+        nxt = float(windows[idx + 1].get("anomaly_score", 0.0) or 0.0)
+        next_badge = f"<span style='color:#667085;'> {lbl['next']}: {nxt:.2f}</span>"
+
+    description_text = html.escape(description.strip() or lbl["no_description"])
+
+    return f"""
+    <div style="font-size: 15px; line-height: 1.45;">
+      <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:12px; flex-wrap:wrap;">
+        <div>
+          <div style="font-size:13px; color:#667085;">{lbl['current_window']}</div>
+          <div style="font-size:22px; font-weight:700; color:#101828;">#{idx + 1} / {len(windows)}</div>
+        </div>
+        <div style="padding:10px 14px; border-radius:999px; background:{score_bg}; color:{score_color}; font-weight:700;">
+          {lbl['score']}: {score:.2f} ({margin_text})
+        </div>
+      </div>
+
+      <div style="display:grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap:10px; margin-bottom:12px;">
+        <div style="padding:12px; border:1px solid #eaecf0; border-radius:12px; background:#fcfcfd;">
+          <div style="color:#667085; font-size:12px;">{lbl['time_range']}</div>
+          <div style="font-weight:650; color:#101828;">{_format_seconds(start_ts)} - {_format_seconds(end_ts)}</div>
+        </div>
+        <div style="padding:12px; border:1px solid #eaecf0; border-radius:12px; background:#fcfcfd;">
+          <div style="color:#667085; font-size:12px;">{lbl['duration']}</div>
+          <div style="font-weight:650; color:#101828;">{_format_seconds(duration)}</div>
+        </div>
+        <div style="padding:12px; border:1px solid #eaecf0; border-radius:12px; background:#fcfcfd;">
+          <div style="color:#667085; font-size:12px;">{lbl['status']} / {lbl['threshold']}</div>
+          <div style="font-weight:650; color:#101828;">{status_text} | {threshold_value:.2f}</div>
+        </div>
+        <div style="padding:12px; border:1px solid #eaecf0; border-radius:12px; background:#fcfcfd;">
+          <div style="color:#667085; font-size:12px;">{lbl['trend']}</div>
+          <div style="font-weight:650; color:{trend_color};">{trend_text}{prev_badge}{next_badge}</div>
+        </div>
+      </div>
+
+      <div style="padding:12px; border:1px solid #eaecf0; border-radius:12px; background:#f9fafb; margin-bottom:12px;">
+        <div style="display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap;">
+          <div><strong>{lbl['rank']}:</strong> #{rank} / {len(windows)}</div>
+          <div><strong>{lbl['frames']}:</strong> {frame_count} ({frame_preview})</div>
+        </div>
+      </div>
+
+      <div style="padding:14px; border-left:4px solid {score_color}; background:#ffffff; border-radius:10px; box-shadow:0 1px 3px rgba(16,24,40,0.08);">
+        <div style="font-weight:700; color:#101828; margin-bottom:6px;">{lbl['model_description']}</div>
+        <div style="color:#344054;">{description_text}</div>
+      </div>
+    </div>
+    """
+
+
 # ------------------------------
 # Main interface callbacks
 # ------------------------------
@@ -1758,8 +2173,14 @@ def _on_run_select(run_name: str, lang: str = "en") -> Tuple:
         summary_text = _build_anomaly_summary(windows, threshold, run_name=run_name, lang=lang)
         
         # Window description for detailed analysis
-        window_header = f"**{lbl['window']} 1 | {lbl['score']}: {score:.2f}**"
-        window_desc = f"<div style='font-size: 1.2em; line-height: 1.6;'>{window_header}\n\n{description}</div>"
+        window_desc = _build_window_detail_html(
+            window,
+            windows,
+            0,
+            threshold,
+            description=description,
+            lang=lang,
+        )
 
         # Check for existing rating
         existing = _get_existing_rating(run_name)
@@ -1902,10 +2323,17 @@ def _on_window_change(run_name: str, window_idx: int, lang: str = "en") -> Tuple
         # Use cached summary (already computed on run select)
         summary_text = _build_anomaly_summary(windows, threshold, run_name=run_name, use_llm=False, lang=lang)
         
-        window_header = f"**{lbl['window']} {int(window_idx) + 1} | {lbl['score']}: {score:.2f}**"
-        window_desc = f"<div style='font-size: 1.2em; line-height: 1.6;'>{window_header}\n\n{description}</div>"
-        
-        status = f"_{lbl['window']} {int(window_idx) + 1}/{len(windows)} | {lbl['frames']}: {frame_names[0]} - {frame_names[-1]}_"
+        window_desc = _build_window_detail_html(
+            window,
+            windows,
+            int(window_idx),
+            threshold,
+            description=description,
+            lang=lang,
+        )
+
+        frame_range = f"{frame_names[0]} - {frame_names[-1]}" if frame_names else "-"
+        status = f"_{lbl['window']} {int(window_idx) + 1}/{len(windows)} | {lbl['frames']}: {frame_range}_"
 
         return (
             grid_img,
@@ -2184,6 +2612,78 @@ def build_interface() -> gr.Blocks:
                         info=t("autostart_info", "en"),
                     )
 
+                    with gr.Accordion("Performance / VRAM settings", open=True):
+                        with gr.Row():
+                            upload_llama_np_input = gr.Slider(
+                                label="llama.cpp parallel slots (np)",
+                                minimum=1,
+                                maximum=4,
+                                value=DEFAULT_LLAMA_PARALLEL,
+                                step=1,
+                                info="Lower to 1 if you see OOM or too much VRAM usage.",
+                            )
+                            upload_caption_parallel_input = gr.Slider(
+                                label="Caption parallel windows",
+                                minimum=1,
+                                maximum=4,
+                                value=DEFAULT_CAPTION_PARALLEL_WINDOWS,
+                                step=1,
+                                info="Lower to 1 if the GPU runs out of memory.",
+                            )
+                        with gr.Row():
+                            upload_caption_window_input = gr.Slider(
+                                label="Caption window size",
+                                minimum=1,
+                                maximum=12,
+                                value=DEFAULT_CAPTION_WINDOW_SIZE,
+                                step=1,
+                                info="Frames per analysis request. Higher can be faster but uses more VRAM/context.",
+                            )
+                            upload_chunk_workers_input = gr.Slider(
+                                label="Chunk workers",
+                                minimum=1,
+                                maximum=4,
+                                value=DEFAULT_CHUNK_WORKERS,
+                                step=1,
+                                info="Parallel video chunks. Keep 1 on 8GB GPUs unless you are testing.",
+                            )
+                        with gr.Row():
+                            upload_ctx_len_input = gr.Slider(
+                                label="llama.cpp context length",
+                                minimum=4096,
+                                maximum=16384,
+                                value=DEFAULT_LLAMA_CTX_LEN,
+                                step=1024,
+                                info="Lower reduces KV cache VRAM; higher allows larger prompts/windows.",
+                            )
+                            upload_batch_input = gr.Slider(
+                                label="llama.cpp batch size",
+                                minimum=256,
+                                maximum=2048,
+                                value=DEFAULT_LLAMA_BATCH,
+                                step=256,
+                                info="Logical prompt batch. Lower if startup fails or VRAM is high.",
+                            )
+                            upload_ubatch_input = gr.Slider(
+                                label="llama.cpp ubatch size",
+                                minimum=64,
+                                maximum=512,
+                                value=DEFAULT_LLAMA_UBATCH,
+                                step=64,
+                                info="Physical GPU microbatch. Lower is safer for VRAM.",
+                            )
+                        with gr.Row():
+                            upload_flash_attn_checkbox = gr.Checkbox(
+                                label="Flash attention",
+                                value=True,
+                                info="Usually faster/lower memory. Disable if llama-server exits during startup.",
+                            )
+                            upload_cont_batching_checkbox = gr.Checkbox(
+                                label="Continuous batching",
+                                value=True,
+                                info="Improves throughput when multiple requests are in flight.",
+                            )
+
                     upload_process_btn = gr.Button("Process uploaded video", variant="secondary")
                     upload_process_logs = gr.Textbox(
                         label=t("processing_logs", "en"),
@@ -2346,7 +2846,22 @@ def build_interface() -> gr.Blocks:
                     outputs=[video_player, upload_status],
                 )
 
-                def process_uploaded_video(file_path, url, model, prompt, autostart):
+                def process_uploaded_video(
+                    file_path,
+                    url,
+                    model,
+                    prompt,
+                    autostart,
+                    llama_np,
+                    caption_parallel,
+                    caption_window,
+                    chunk_workers,
+                    ctx_len,
+                    batch_size,
+                    ubatch_size,
+                    flash_attn,
+                    cont_batching,
+                ):
                     if not file_path:
                         yield "Error: Please upload a video first.", gr.update(), "_No uploaded video selected._"
                         return
@@ -2364,6 +2879,15 @@ def build_interface() -> gr.Blocks:
                         prompt,
                         autostart,
                         run_dir=target_run_dir,
+                        llama_parallel_slots=int(llama_np or DEFAULT_LLAMA_PARALLEL),
+                        caption_parallel_windows=int(caption_parallel or DEFAULT_CAPTION_PARALLEL_WINDOWS),
+                        caption_window_size=int(caption_window or DEFAULT_CAPTION_WINDOW_SIZE),
+                        chunk_workers_override=int(chunk_workers or DEFAULT_CHUNK_WORKERS),
+                        llama_ctx_len=int(ctx_len or DEFAULT_LLAMA_CTX_LEN),
+                        llama_batch_size=int(batch_size or DEFAULT_LLAMA_BATCH),
+                        llama_ubatch_size=int(ubatch_size or DEFAULT_LLAMA_UBATCH),
+                        llama_flash_attn=bool(flash_attn),
+                        llama_cont_batching=bool(cont_batching),
                     ):
                         latest_log = log
                         yield latest_log, gr.update(), processing_status
@@ -2386,6 +2910,15 @@ def build_interface() -> gr.Blocks:
                         upload_llama_model_input,
                         upload_prompt_input,
                         upload_autostart_checkbox,
+                        upload_llama_np_input,
+                        upload_caption_parallel_input,
+                        upload_caption_window_input,
+                        upload_chunk_workers_input,
+                        upload_ctx_len_input,
+                        upload_batch_input,
+                        upload_ubatch_input,
+                        upload_flash_attn_checkbox,
+                        upload_cont_batching_checkbox,
                     ],
                     outputs=[upload_process_logs, run_selector, upload_status],
                 )
@@ -2501,6 +3034,78 @@ def build_interface() -> gr.Blocks:
                     info=t("autostart_info", "en"),
                 )
 
+                with gr.Accordion("Performance / VRAM settings", open=True):
+                    with gr.Row():
+                        llama_np_input = gr.Slider(
+                            label="llama.cpp parallel slots (np)",
+                            minimum=1,
+                            maximum=4,
+                            value=DEFAULT_LLAMA_PARALLEL,
+                            step=1,
+                            info="Set to 1 if you see OOM or too much VRAM usage.",
+                        )
+                        caption_parallel_input = gr.Slider(
+                            label="Caption parallel windows",
+                            minimum=1,
+                            maximum=4,
+                            value=DEFAULT_CAPTION_PARALLEL_WINDOWS,
+                            step=1,
+                            info="Set to 1 for low-VRAM mode; higher values keep GPU busier.",
+                        )
+                    with gr.Row():
+                        caption_window_input = gr.Slider(
+                            label="Caption window size",
+                            minimum=1,
+                            maximum=12,
+                            value=DEFAULT_CAPTION_WINDOW_SIZE,
+                            step=1,
+                            info="Frames per analysis request. Higher can be faster but uses more VRAM/context.",
+                        )
+                        chunk_workers_input = gr.Slider(
+                            label="Chunk workers",
+                            minimum=1,
+                            maximum=4,
+                            value=DEFAULT_CHUNK_WORKERS,
+                            step=1,
+                            info="Parallel video chunks. Keep 1 on 8GB GPUs unless you are testing.",
+                        )
+                    with gr.Row():
+                        ctx_len_input = gr.Slider(
+                            label="llama.cpp context length",
+                            minimum=4096,
+                            maximum=16384,
+                            value=DEFAULT_LLAMA_CTX_LEN,
+                            step=1024,
+                            info="Lower reduces KV cache VRAM; higher allows larger prompts/windows.",
+                        )
+                        batch_input = gr.Slider(
+                            label="llama.cpp batch size",
+                            minimum=256,
+                            maximum=2048,
+                            value=DEFAULT_LLAMA_BATCH,
+                            step=256,
+                            info="Logical prompt batch. Lower if startup fails or VRAM is high.",
+                        )
+                        ubatch_input = gr.Slider(
+                            label="llama.cpp ubatch size",
+                            minimum=64,
+                            maximum=512,
+                            value=DEFAULT_LLAMA_UBATCH,
+                            step=64,
+                            info="Physical GPU microbatch. Lower is safer for VRAM.",
+                        )
+                    with gr.Row():
+                        flash_attn_checkbox = gr.Checkbox(
+                            label="Flash attention",
+                            value=True,
+                            info="Usually faster/lower memory. Disable if llama-server exits during startup.",
+                        )
+                        cont_batching_checkbox = gr.Checkbox(
+                            label="Continuous batching",
+                            value=True,
+                            info="Improves throughput when multiple requests are in flight.",
+                        )
+
                 process_btn = gr.Button(t("start_processing", "en"), variant="primary")
 
                 process_logs = gr.Textbox(
@@ -2531,17 +3136,64 @@ def build_interface() -> gr.Blocks:
                     outputs=[video_selector, video_paths_state],
                 )
 
-                def start_processing(video_name, paths, url, model, prompt, autostart):
+                def start_processing(
+                    video_name,
+                    paths,
+                    url,
+                    model,
+                    prompt,
+                    autostart,
+                    llama_np,
+                    caption_parallel,
+                    caption_window,
+                    chunk_workers,
+                    ctx_len,
+                    batch_size,
+                    ubatch_size,
+                    flash_attn,
+                    cont_batching,
+                ):
                     if not video_name or video_name not in paths:
                         yield "Error: Please select a video first."
                         return
                     video_path = paths[video_name]
-                    for log in _run_video_processing(video_path, url, model, prompt, autostart):
+                    for log in _run_video_processing(
+                        video_path,
+                        url,
+                        model,
+                        prompt,
+                        autostart,
+                        llama_parallel_slots=int(llama_np or DEFAULT_LLAMA_PARALLEL),
+                        caption_parallel_windows=int(caption_parallel or DEFAULT_CAPTION_PARALLEL_WINDOWS),
+                        caption_window_size=int(caption_window or DEFAULT_CAPTION_WINDOW_SIZE),
+                        chunk_workers_override=int(chunk_workers or DEFAULT_CHUNK_WORKERS),
+                        llama_ctx_len=int(ctx_len or DEFAULT_LLAMA_CTX_LEN),
+                        llama_batch_size=int(batch_size or DEFAULT_LLAMA_BATCH),
+                        llama_ubatch_size=int(ubatch_size or DEFAULT_LLAMA_UBATCH),
+                        llama_flash_attn=bool(flash_attn),
+                        llama_cont_batching=bool(cont_batching),
+                    ):
                         yield log
 
                 process_btn.click(
                     fn=start_processing,
-                    inputs=[video_selector, video_paths_state, llama_url_input, llama_model_input, prompt_input, autostart_checkbox],
+                    inputs=[
+                        video_selector,
+                        video_paths_state,
+                        llama_url_input,
+                        llama_model_input,
+                        prompt_input,
+                        autostart_checkbox,
+                        llama_np_input,
+                        caption_parallel_input,
+                        caption_window_input,
+                        chunk_workers_input,
+                        ctx_len_input,
+                        batch_input,
+                        ubatch_input,
+                        flash_attn_checkbox,
+                        cont_batching_checkbox,
+                    ],
                     outputs=[process_logs],
                 )
 

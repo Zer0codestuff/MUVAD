@@ -3,6 +3,7 @@ import os
 import time
 import torch
 import sys
+from concurrent.futures import ThreadPoolExecutor
 
 from helpers.structs import Frame
 from helpers.module import Module
@@ -44,6 +45,8 @@ class Captioner(Module):
         self.aggregate_outputs: bool = bool(aggregate)
         self.aggregate_frames_tag: str = str(aggregate_frames_tag)
         self.aggregate_timestamp_joiner: str = str(aggregate_timestamp_joiner)
+        self.aggregate_window_size: int = int(kwargs.get("aggregate_window_size", batch_size) or batch_size or 1)
+        self.aggregate_max_workers: int = int(kwargs.get("aggregate_max_workers", 1) or 1)
 
         # Load model
         backend_norm = self._backend
@@ -94,6 +97,16 @@ class Captioner(Module):
                 self.aggregate_timestamp_joiner = str(kwargs["aggregate_timestamp_joiner"])
             except Exception:
                 self.aggregate_timestamp_joiner = ", "
+        if "aggregate_window_size" in kwargs:
+            try:
+                self.aggregate_window_size = max(1, int(kwargs["aggregate_window_size"]))
+            except Exception:
+                self.aggregate_window_size = max(1, int(self.aggregate_window_size or self.batch_size or 1))
+        if "aggregate_max_workers" in kwargs:
+            try:
+                self.aggregate_max_workers = max(1, int(kwargs["aggregate_max_workers"]))
+            except Exception:
+                self.aggregate_max_workers = 1
 
         # Check save file
         if self.save_file:
@@ -132,17 +145,20 @@ class Captioner(Module):
         max_retries = max(1, self.max_retries)
         aggregate_response: str = ""
         if self.aggregate_outputs:
-            while True:
-                aggregate_response = self._generate_aggregate(batch).strip()
-                if aggregate_response:
-                    break
-                retries += 1
-                if retries >= max_retries:
-                    break
-                time.sleep(0.5)
-            if not aggregate_response and self._backend.startswith("llama"):
-                raise RuntimeError("llama.cpp captioner returned an empty aggregate response")
-            results = [self._format_aggregate_output(batch, aggregate_response)]
+            windows = self._aggregate_windows(batch)
+            if len(windows) == 1:
+                aggregate_response = self._generate_aggregate_with_retries(windows[0], max_retries)
+                results = [self._format_aggregate_output(windows[0], aggregate_response)]
+            else:
+                results = [""] * len(windows)
+                max_workers = min(max(1, self.aggregate_max_workers), len(windows))
+                with ThreadPoolExecutor(max_workers=max_workers) as executor:
+                    futures = [
+                        executor.submit(self._generate_aggregate_with_retries, window, max_retries)
+                        for window in windows
+                    ]
+                    for idx, future in enumerate(futures):
+                        results[idx] = self._format_aggregate_output(windows[idx], future.result())
         else:
             while True:
                 captions = self.model.generate(self.prompt, [frame.image for frame in batch])
@@ -181,6 +197,29 @@ class Captioner(Module):
                     save_file.write(f"{caption}\n")
 
         return results
+
+    def _aggregate_windows(self, batch: list[Frame]) -> list[list[Frame]]:
+        window_size = max(1, int(self.aggregate_window_size or len(batch) or 1))
+        return [
+            batch[start:start + window_size]
+            for start in range(0, len(batch), window_size)
+            if batch[start:start + window_size]
+        ]
+
+    def _generate_aggregate_with_retries(self, batch: list[Frame], max_retries: int) -> str:
+        retries = 0
+        response = ""
+        while True:
+            response = self._generate_aggregate(batch).strip()
+            if response:
+                return response
+            retries += 1
+            if retries >= max_retries:
+                break
+            time.sleep(0.5)
+        if self._backend.startswith("llama"):
+            raise RuntimeError("llama.cpp captioner returned an empty aggregate response")
+        return response
 
     def _generate_aggregate(self, batch: list[Frame]) -> str:
         images = [frame.image for frame in batch]
