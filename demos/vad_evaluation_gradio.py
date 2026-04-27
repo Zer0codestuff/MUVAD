@@ -221,7 +221,7 @@ def t(key: str, lang: str = "en", **kwargs) -> str:
 
 # Default LLM config (same as processing)
 DEFAULT_LLM_URL = "http://localhost:8080"
-DEFAULT_LLM_MODEL = "unsloth/InternVL3-2B-GGUF:UD-Q4_K_XL"
+DEFAULT_LLM_MODEL = "unsloth/InternVL3-2B-GGUF:UD-Q6_K_XL"
 DEFAULT_LLAMA_CTX_LEN = 8192
 DEFAULT_LLAMA_BATCH = 1024
 DEFAULT_LLAMA_UBATCH = 256
