@@ -235,6 +235,7 @@ DEFAULT_FRAME_SAVE_EXT = "jpg"
 DEFAULT_IMAGE_QUALITY = 85
 DEFAULT_LLAMA_REASONING = False
 DEFAULT_LLAMA_REASONING_BUDGET = 0
+DEFAULT_ANOMALY_THRESHOLD = 0.51
 
 # Cache for summaries (run_name -> summary)
 _summary_cache: Dict[str, str] = {}
@@ -888,7 +889,7 @@ def _build_async_pipeline_config(
         },
         "notifier": {
             **config.get("notifier", {}),
-            "threshold": 0.5,
+            "threshold": DEFAULT_ANOMALY_THRESHOLD,
             "result_key": "anomaly_score",
             "description_key": "description",
             "decision_mode": "moving_average",
@@ -1363,7 +1364,7 @@ def _run_video_processing(
         data = _load_run_inference_data(run_dir)
         if data:
             any_anomalous = any(
-                bool(window.get("is_anomalous")) or float(window.get("anomaly_score", 0.0)) >= float(data.get("threshold", 0.5))
+                bool(window.get("is_anomalous")) or float(window.get("anomaly_score", 0.0)) >= float(data.get("threshold", DEFAULT_ANOMALY_THRESHOLD))
                 for window in data.get("windows", [])
             )
             accumulated += "\nProcessing complete!\n"
@@ -1540,7 +1541,7 @@ def _run_video_processing(
         data = _load_run_inference_data(run_dir)
         if data:
             any_anomalous = any(
-                bool(window.get("is_anomalous")) or float(window.get("anomaly_score", 0.0)) >= float(data.get("threshold", 0.5))
+                bool(window.get("is_anomalous")) or float(window.get("anomaly_score", 0.0)) >= float(data.get("threshold", DEFAULT_ANOMALY_THRESHOLD))
                 for window in data.get("windows", [])
             )
             accumulated += "\nProcessing complete!\n"
@@ -2031,7 +2032,7 @@ def _build_window_detail_html(
     try:
         threshold_value = float(threshold)
     except (TypeError, ValueError):
-        threshold_value = 0.5
+        threshold_value = DEFAULT_ANOMALY_THRESHOLD
 
     start_ts = float(window.get("timestamp_start", window.get("timestamp_center", 0.0)) or 0.0)
     center_ts = float(window.get("timestamp_center", start_ts) or start_ts)
@@ -2239,7 +2240,7 @@ def _on_run_select(run_name: str, lang: str = "en") -> Tuple:
 
         # Create plot
         segments = data.get("segments", [])
-        threshold = data.get("threshold", 0.5)
+        threshold = data.get("threshold", DEFAULT_ANOMALY_THRESHOLD)
         plot_img = _create_anomaly_plot(windows, segments, threshold, 0)
 
         # Overall summary - the main classification result
@@ -2390,7 +2391,7 @@ def _on_window_change(run_name: str, window_idx: int, lang: str = "en") -> Tuple
 
         # Create plot
         segments = data.get("segments", [])
-        threshold = data.get("threshold", 0.5)
+        threshold = data.get("threshold", DEFAULT_ANOMALY_THRESHOLD)
         plot_img = _create_anomaly_plot(windows, segments, threshold, int(window_idx))
 
         # Use cached summary (already computed on run select)
