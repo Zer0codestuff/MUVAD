@@ -844,6 +844,60 @@ def _chunk_inference_path(chunk_dir: Path) -> Optional[Path]:
     return json_files[0] if json_files else None
 
 
+def _load_run_inference_data(run_dir: Path) -> Optional[Dict[str, Any]]:
+    output_dir = run_dir / "output"
+    if not output_dir.exists():
+        return None
+    json_files = list(output_dir.glob("*_inference_data.json"))
+    if not json_files:
+        return None
+    try:
+        return json.loads(json_files[0].read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return None
+
+
+def _short_log_text(text: str, max_chars: int = 140) -> str:
+    cleaned = " ".join(str(text or "").split())
+    if len(cleaned) <= max_chars:
+        return cleaned
+    return f"{cleaned[: max_chars - 3]}..."
+
+
+def _new_caption_feedback_lines(
+    captioner_path: Path,
+    *,
+    chunk_label: str,
+    start_index: int,
+) -> Tuple[List[str], int]:
+    if not captioner_path.exists():
+        return [], start_index
+
+    try:
+        captioner_text = captioner_path.read_text(encoding="utf-8", errors="ignore")
+    except OSError:
+        return [], start_index
+
+    blocks = _captioner_blocks(captioner_text)
+    if start_index >= len(blocks):
+        return [], len(blocks)
+
+    lines: List[str] = []
+    for idx, block in enumerate(blocks[start_index:], start=start_index + 1):
+        frame_line = next((line for line in block.splitlines() if line.startswith("- frames: ")), "")
+        frames = frame_line.removeprefix("- frames: ").strip() or "unknown frames"
+        parsed = _parse_json_object(block)
+        try:
+            score = float(parsed.get("anomaly_score", 0.0))
+        except (TypeError, ValueError):
+            score = 0.0
+        description = _short_log_text(str(parsed.get("description", "") or ""))
+        detail = f" | {description}" if description else ""
+        lines.append(f"{chunk_label}: window {idx} ready | frames {frames} | score={score:.2f}{detail}\n")
+
+    return lines, len(blocks)
+
+
 def _clear_generated_run_outputs(run_dir: Path) -> None:
     for path in (run_dir / "frames_selected").glob("frame_*.*"):
         try:
@@ -1093,28 +1147,30 @@ def _run_video_processing(
         worker.start()
 
         last_progress = 0.0
+        reported_windows = 0
         active_frames_selected_dir = active_run_dir / "frames_selected"
         active_output_dir = active_run_dir / "output"
+        captioner_path = active_output_dir / "captioner.txt"
         while worker.is_alive() or not status_queue.empty():
             try:
                 kind, payload = status_queue.get(timeout=0.5)
             except queue.Empty:
+                new_lines, reported_windows = _new_caption_feedback_lines(
+                    captioner_path,
+                    chunk_label=chunk_label,
+                    start_index=reported_windows,
+                )
+                if new_lines:
+                    accumulated += "".join(new_lines)
+                    yield accumulated
+                    continue
+
                 now = time.time()
-                if now - last_progress >= 10.0:
+                if now - last_progress >= 5.0:
                     selected_count = len(list(active_frames_selected_dir.glob("frame_*.*")))
-                    captioner_path = active_output_dir / "captioner.txt"
-                    window_count = 0
-                    if captioner_path.exists():
-                        try:
-                            window_count = captioner_path.read_text(
-                                encoding="utf-8",
-                                errors="ignore",
-                            ).count("- frames: ")
-                        except Exception:
-                            window_count = 0
                     accumulated += (
                         f"{chunk_label}: selected frames={selected_count}, "
-                        f"completed windows={window_count}\n"
+                        f"completed windows={reported_windows}\n"
                     )
                     last_progress = now
                     yield accumulated
@@ -1126,6 +1182,13 @@ def _run_video_processing(
             elif kind == "done":
                 result, json_path = payload
                 any_anomalous = any_anomalous or bool(result)
+                new_lines, reported_windows = _new_caption_feedback_lines(
+                    captioner_path,
+                    chunk_label=chunk_label,
+                    start_index=reported_windows,
+                )
+                if new_lines:
+                    accumulated += "".join(new_lines)
                 if chunked:
                     final_json_path = _merge_chunk_results(
                         run_dir=run_dir,
@@ -1135,7 +1198,7 @@ def _run_video_processing(
                         window_step=int(config["captioner"]["batch_size"]),
                         video_total_s=video_total_s,
                     )
-                    merged_data = _load_inference_data(run_dir.name)
+                    merged_data = _load_run_inference_data(run_dir)
                     windows_count = len(merged_data.get("windows", [])) if merged_data else 0
                     selected_count = len(merged_data.get("selected_frames", [])) if merged_data else len(list(frames_selected_dir.glob("frame_*.*")))
                     accumulated += f"{chunk_label}: complete. Chunk data saved to: {json_path}\n"
@@ -1144,7 +1207,7 @@ def _run_video_processing(
                         accumulated += f"Merged inference data saved to: {final_json_path}\n"
                 else:
                     final_json_path = json_path
-                    data = _load_inference_data(run_dir.name)
+                    data = _load_run_inference_data(run_dir)
                     windows_count = len(data.get("windows", [])) if data else 0
                     selected_count = len(data.get("selected_frames", [])) if data else len(list(frames_selected_dir.glob("frame_*.*")))
                     accumulated += "\nProcessing complete!\n"
@@ -1171,7 +1234,7 @@ def _run_video_processing(
             window_step=int(preview_config["captioner"]["batch_size"]),
             video_total_s=video_total_s,
         )
-        data = _load_inference_data(run_dir.name)
+        data = _load_run_inference_data(run_dir)
         if data:
             any_anomalous = any(
                 bool(window.get("is_anomalous")) or float(window.get("anomaly_score", 0.0)) >= float(data.get("threshold", 0.5))
