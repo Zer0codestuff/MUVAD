@@ -16,7 +16,7 @@ import subprocess
 import sys
 import threading
 import time
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, wait
 from datetime import datetime
 from math import ceil
 from pathlib import Path
@@ -1236,6 +1236,23 @@ def _run_video_processing(
         )
         return chunk_idx, result, json_path, False
 
+    def chunk_progress_line(chunk: Tuple[int, float, float], *, state: str = "running") -> str:
+        chunk_idx, start_time, end_time = chunk
+        chunk_dir = _chunk_run_dir(run_dir, chunk_idx)
+        selected_dir = chunk_dir / "frames_selected"
+        captioner_path = chunk_dir / "output" / "captioner.txt"
+        selected_count = len(list(selected_dir.glob("frame_*.*"))) if selected_dir.exists() else 0
+        completed_windows = 0
+        if captioner_path.exists():
+            try:
+                completed_windows = len(_captioner_blocks(captioner_path.read_text(encoding="utf-8", errors="ignore")))
+            except OSError:
+                completed_windows = 0
+        return (
+            f"Chunk {chunk_idx + 1}/{len(chunks)} [{start_time:.1f}s - {end_time:.1f}s]: "
+            f"{state}, selected frames={selected_count}, completed windows={completed_windows}\n"
+        )
+
     if len(chunks) > 1 and chunk_workers > 1:
         accumulated += f"Parallel chunk processing enabled with {chunk_workers} workers.\n"
         yield accumulated
@@ -1265,28 +1282,71 @@ def _run_video_processing(
 
         with ThreadPoolExecutor(max_workers=min(chunk_workers, len(pending_chunks))) as executor:
             futures = {executor.submit(process_chunk_sync, chunk): chunk for chunk in pending_chunks}
-            for future in as_completed(futures):
-                try:
-                    chunk_idx, result, json_path, skipped = future.result()
-                except Exception as exc:
-                    accumulated += f"\nProcessing failed: {exc}\n"
+            reported_windows_by_chunk: Dict[int, int] = {chunk[0]: 0 for chunk in pending_chunks}
+            last_parallel_progress = 0.0
+            while futures:
+                done, _ = wait(futures, timeout=1.0, return_when=FIRST_COMPLETED)
+                now = time.time()
+                if not done and now - last_parallel_progress >= 5.0:
+                    running_chunks = [chunk for future, chunk in futures.items() if future.running()]
+                    queued_count = sum(1 for future in futures if not future.running() and not future.done())
+                    if running_chunks:
+                        accumulated += "Parallel progress and completed window analyses:\n"
+                        for chunk in sorted(running_chunks, key=lambda item: item[0]):
+                            chunk_idx = chunk[0]
+                            chunk_label = f"Chunk {chunk_idx + 1}/{len(chunks)} [{chunk[1]:.1f}s - {chunk[2]:.1f}s]"
+                            captioner_path = _chunk_run_dir(run_dir, chunk_idx) / "output" / "captioner.txt"
+                            new_lines, reported_windows = _new_caption_feedback_lines(
+                                captioner_path,
+                                chunk_label=chunk_label,
+                                start_index=reported_windows_by_chunk.get(chunk_idx, 0),
+                            )
+                            reported_windows_by_chunk[chunk_idx] = reported_windows
+                            if new_lines:
+                                accumulated += "".join(new_lines)
+                            accumulated += chunk_progress_line(chunk)
+                    if queued_count:
+                        accumulated += f"Queued chunks waiting for a worker: {queued_count}\n"
+                    last_parallel_progress = now
                     yield accumulated
-                    return
-                any_anomalous = any_anomalous or bool(result)
-                final_json_path = _merge_chunk_results(
-                    run_dir=run_dir,
-                    video_name=video_stem,
-                    prompt=prompt,
-                    threshold=float(preview_config["notifier"]["threshold"]),
-                    window_step=int(preview_config["captioner"]["aggregate_window_size"]),
-                    video_total_s=video_total_s,
-                )
-                data = _load_run_inference_data(run_dir)
-                windows_count = len(data.get("windows", [])) if data else 0
-                selected_count = len(data.get("selected_frames", [])) if data else len(list(frames_selected_dir.glob("frame_*.*")))
-                accumulated += f"Chunk {chunk_idx + 1}/{len(chunks)}: {'already processed' if skipped else 'complete'} ({json_path})\n"
-                accumulated += f"Merged progress: selected frames={selected_count} | analysis windows={windows_count}\n"
-                yield accumulated
+                    continue
+
+                for future in done:
+                    chunk = futures.pop(future)
+                    chunk_idx = chunk[0]
+                    chunk_label = f"Chunk {chunk_idx + 1}/{len(chunks)} [{chunk[1]:.1f}s - {chunk[2]:.1f}s]"
+                    captioner_path = _chunk_run_dir(run_dir, chunk_idx) / "output" / "captioner.txt"
+                    new_lines, reported_windows = _new_caption_feedback_lines(
+                        captioner_path,
+                        chunk_label=chunk_label,
+                        start_index=reported_windows_by_chunk.get(chunk_idx, 0),
+                    )
+                    reported_windows_by_chunk[chunk_idx] = reported_windows
+                    if new_lines:
+                        accumulated += "".join(new_lines)
+                    accumulated += chunk_progress_line(chunk, state="finishing")
+                    yield accumulated
+                    try:
+                        chunk_idx, result, json_path, skipped = future.result()
+                    except Exception as exc:
+                        accumulated += f"\nProcessing failed: {exc}\n"
+                        yield accumulated
+                        return
+                    any_anomalous = any_anomalous or bool(result)
+                    final_json_path = _merge_chunk_results(
+                        run_dir=run_dir,
+                        video_name=video_stem,
+                        prompt=prompt,
+                        threshold=float(preview_config["notifier"]["threshold"]),
+                        window_step=int(preview_config["captioner"]["aggregate_window_size"]),
+                        video_total_s=video_total_s,
+                    )
+                    data = _load_run_inference_data(run_dir)
+                    windows_count = len(data.get("windows", [])) if data else 0
+                    selected_count = len(data.get("selected_frames", [])) if data else len(list(frames_selected_dir.glob("frame_*.*")))
+                    accumulated += f"Chunk {chunk_idx + 1}/{len(chunks)}: {'already processed' if skipped else 'complete'} ({json_path})\n"
+                    accumulated += f"Merged progress: selected frames={selected_count} | analysis windows={windows_count}\n"
+                    yield accumulated
 
         data = _load_run_inference_data(run_dir)
         if data:
