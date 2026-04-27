@@ -37,11 +37,15 @@ class Extractor(Module):
         # Initialize instance variables
         self.video_url = os.path.expanduser(video_url)
         self.save_dir = os.path.expanduser(save_dir)
-        self.timestamp = 0
+        self.frame_stride = max(1, int(kwargs.get("frame_stride", 1) or 1))
+        self.start_time = max(0.0, float(kwargs.get("start_time", 0.0) or 0.0))
+        raw_end_time = kwargs.get("end_time")
+        self.end_time = float(raw_end_time) if raw_end_time is not None else None
+        self.timestamp = self.start_time
 
         # Open video
         self.video = cv2.VideoCapture(self.video_url)
-        self.video_fps = self.video.get(cv2.CAP_PROP_FPS)
+        self.video_fps = float(self.video.get(cv2.CAP_PROP_FPS) or 30.0)
         # Try to read total frames from metadata (may be 0 or unavailable depending on container)
         try:
             _tot = int(self.video.get(cv2.CAP_PROP_FRAME_COUNT))
@@ -55,6 +59,13 @@ class Extractor(Module):
         else:
             logger.error(f"Unable to open the video {self.video_url}")
             exit()
+
+        self.current_frame_index = int(round(self.start_time * self.video_fps))
+        if self.current_frame_index > 0:
+            self.video.set(cv2.CAP_PROP_POS_FRAMES, self.current_frame_index)
+        self.end_frame_index = None
+        if self.end_time is not None:
+            self.end_frame_index = max(self.current_frame_index, int(round(self.end_time * self.video_fps)))
 
         # Check save directory
         if self.save_dir:
@@ -76,6 +87,11 @@ class Extractor(Module):
     def extract(self, batch: list) -> list[Frame]:
         """Thread function for extract one frame from video"""
 
+        if self.end_frame_index is not None and self.current_frame_index >= self.end_frame_index:
+            self.video.release()
+            self.queue_in_end()
+            return []
+
         success, frame = self.video.read() # Extract frame
 
         # If no more frame, close video and end thread
@@ -84,19 +100,31 @@ class Extractor(Module):
             self.queue_in_end()
             return []
 
+        timestamp = self.current_frame_index / self.video_fps
+
         # Convert frame to image
         image = pil.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)).convert("RGB")
-        logger.debug(f"Frame {self.timestamp} read")
+        logger.debug(f"Frame {timestamp} read")
         if self.resize:
             image = image.resize(self.resize)
 
         # Save frame in save_dir
         if self.save_dir:
-            image.save(os.path.join(self.save_dir, f"frame_{self.timestamp}.png"))
+            image.save(os.path.join(self.save_dir, f"frame_{timestamp}.png"))
 
-        frame = Frame(image, self.timestamp) # Create new frame object
-        self.timestamp += 1/self.video_fps # Read next frame with its timestamp
+        frame = Frame(image, timestamp) # Create new frame object
         self.processed_frames += 1
+        self.current_frame_index += 1
+
+        skipped = 0
+        while skipped < self.frame_stride - 1:
+            if self.end_frame_index is not None and self.current_frame_index >= self.end_frame_index:
+                break
+            if not self.video.grab():
+                break
+            self.current_frame_index += 1
+            skipped += 1
+        self.timestamp = self.current_frame_index / self.video_fps
 
         # Return new frames to advance
         return [frame]

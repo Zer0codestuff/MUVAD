@@ -217,7 +217,13 @@ def t(key: str, lang: str = "en", **kwargs) -> str:
 
 # Default LLM config (same as processing)
 DEFAULT_LLM_URL = "http://localhost:8080"
-DEFAULT_LLM_MODEL = "lmstudio-community/InternVL3_5-2B-GGUF:Q8_0"
+DEFAULT_LLM_MODEL = "unsloth/InternVL3-2B-GGUF:UD-Q4_K_XL"
+DEFAULT_LLAMA_CTX_LEN = 8192
+DEFAULT_LLAMA_BATCH = 1024
+DEFAULT_LLAMA_UBATCH = 256
+DEFAULT_LLAMA_PARALLEL = 1
+DEFAULT_ANALYSIS_FPS = 2.0
+DEFAULT_CHUNK_SECONDS = 600
 
 # Cache for summaries (run_name -> summary)
 _summary_cache: Dict[str, str] = {}
@@ -225,6 +231,28 @@ _summary_cache: Dict[str, str] = {}
 # Global variable to track if server was started by us
 _llama_server_process: Optional[subprocess.Popen] = None
 _server_started: bool = False
+
+
+def _env_int(name: str, default: int) -> int:
+    raw = os.environ.get(name)
+    if raw is None:
+        return default
+    try:
+        value = int(raw)
+    except ValueError:
+        return default
+    return value if value > 0 else default
+
+
+def _env_float(name: str, default: float) -> float:
+    raw = os.environ.get(name)
+    if raw is None:
+        return default
+    try:
+        value = float(raw)
+    except ValueError:
+        return default
+    return value if value > 0 else default
 
 
 def _is_server_running(url: str = DEFAULT_LLM_URL) -> bool:
@@ -245,7 +273,7 @@ def _start_llama_server(
     model_name: str = DEFAULT_LLM_MODEL,
     port: int = 8080,
     ngl: int = 999,
-    ctx_len: int = 8192,
+    ctx_len: int = DEFAULT_LLAMA_CTX_LEN,
     server_bin: str = "llama-server",
 ) -> bool:
     """Start llama-server if not already running. Uses -hf flag to download from HuggingFace."""
@@ -256,6 +284,10 @@ def _start_llama_server(
         return True
     
     print(f"[LLM Server] Starting llama-server with model: {model_name}")
+    ctx_len = _env_int("MUVAD_LLAMA_CTX_LEN", int(ctx_len))
+    parallel_slots = _env_int("MUVAD_LLAMA_NP", DEFAULT_LLAMA_PARALLEL)
+    batch_size = _env_int("MUVAD_LLAMA_BATCH", DEFAULT_LLAMA_BATCH)
+    ubatch_size = _env_int("MUVAD_LLAMA_UBATCH", DEFAULT_LLAMA_UBATCH)
     
     # Create log file
     log_path = REPO_ROOT / "tmp" / "llama_server_summary.log"
@@ -268,6 +300,9 @@ def _start_llama_server(
             "--port", str(port),
             "-ngl", str(ngl),
             "--ctx-size", str(ctx_len),
+            "-np", str(parallel_slots),
+            "-b", str(batch_size),
+            "-ub", str(ubatch_size),
             "--host", "0.0.0.0",
         ]
         
@@ -686,6 +721,8 @@ def _build_async_pipeline_config(
     prompt: str,
     autostart_server: bool,
     video_fps: float,
+    start_time: float = 0.0,
+    end_time: Optional[float] = None,
 ) -> Dict[str, Any]:
     from scripts.prediction.workflow import read_config
 
@@ -695,20 +732,29 @@ def _build_async_pipeline_config(
         config = {}
 
     output_dir = run_dir / "output"
-    select_fps = 2.0
+    select_fps = _env_float("MUVAD_ANALYSIS_FPS", DEFAULT_ANALYSIS_FPS)
     selector_stride = max(1, int(round(float(video_fps or 30.0) / select_fps)))
     normalized_llama_url = _normalize_llama_host(llama_url)
     server_already_running = _is_server_running(normalized_llama_url)
 
     captioner_params = dict(config.get("captioner", {}).get("parameters", {}) or {})
+    ctx_len = _env_int("MUVAD_LLAMA_CTX_LEN", DEFAULT_LLAMA_CTX_LEN)
+    batch_size = _env_int("MUVAD_LLAMA_BATCH", DEFAULT_LLAMA_BATCH)
+    ubatch_size = _env_int("MUVAD_LLAMA_UBATCH", DEFAULT_LLAMA_UBATCH)
+    parallel_slots = _env_int("MUVAD_LLAMA_NP", DEFAULT_LLAMA_PARALLEL)
+
+    # The base config is tuned for large offline runs (np=10, ctx_len=81920).
+    # The Gradio demo runs one request stream and should not inherit those VRAM-heavy defaults.
     captioner_params.update({
         "max_tokens": 512,
         "temperature": 0.0,
         "top_p": 0.0,
-        "cont_batching": True,
+        "cont_batching": False,
         "ngl": captioner_params.get("ngl", 999),
-        "ctx_len": captioner_params.get("ctx_len", 8192),
-        "np": captioner_params.get("np", 1),
+        "ctx_len": ctx_len,
+        "batch": batch_size,
+        "ubatch": ubatch_size,
+        "np": parallel_slots,
         "autostart": bool(autostart_server) and not server_already_running,
         "ready_timeout": 300.0 if autostart_server else 20.0,
     })
@@ -720,12 +766,15 @@ def _build_async_pipeline_config(
             "video_url": str(video_path),
             "timeout": 0.0,
             "resize": [448, 448],
+            "frame_stride": selector_stride,
+            "start_time": float(start_time),
+            "end_time": float(end_time) if end_time is not None else None,
             "save_dir": "",
             "log": "INFO",
         },
         "selector": {
             **config.get("selector", {}),
-            "batch_size": selector_stride,
+            "batch_size": 1,
             "save_dir": str(run_dir / "frames_selected"),
             "log": "INFO",
         },
@@ -768,6 +817,141 @@ def _build_async_pipeline_config(
     }
 
 
+def _chunk_ranges(video_total_s: float, chunk_seconds: int) -> List[Tuple[int, float, float]]:
+    if video_total_s <= 0 or chunk_seconds <= 0 or video_total_s <= chunk_seconds:
+        return [(0, 0.0, video_total_s if video_total_s > 0 else 0.0)]
+
+    chunks: List[Tuple[int, float, float]] = []
+    start = 0.0
+    idx = 0
+    while start < video_total_s:
+        end = min(video_total_s, start + float(chunk_seconds))
+        chunks.append((idx, start, end))
+        start = end
+        idx += 1
+    return chunks
+
+
+def _chunk_run_dir(run_dir: Path, chunk_idx: int) -> Path:
+    return run_dir / "chunks" / f"chunk_{chunk_idx:04d}"
+
+
+def _chunk_inference_path(chunk_dir: Path) -> Optional[Path]:
+    output_dir = chunk_dir / "output"
+    if not output_dir.exists():
+        return None
+    json_files = list(output_dir.glob("*_inference_data.json"))
+    return json_files[0] if json_files else None
+
+
+def _clear_generated_run_outputs(run_dir: Path) -> None:
+    for path in (run_dir / "frames_selected").glob("frame_*.*"):
+        try:
+            path.unlink()
+        except OSError:
+            pass
+    for path in (run_dir / "output").glob("*_inference_data.json"):
+        try:
+            path.unlink()
+        except OSError:
+            pass
+    captioner_path = run_dir / "output" / "captioner.txt"
+    if captioner_path.exists():
+        try:
+            captioner_path.unlink()
+        except OSError:
+            pass
+
+
+def _merge_chunk_results(
+    *,
+    run_dir: Path,
+    video_name: str,
+    prompt: str,
+    threshold: float,
+    window_step: int,
+    video_total_s: float,
+) -> Optional[Path]:
+    chunk_json_paths = sorted((run_dir / "chunks").glob("chunk_*/output/*_inference_data.json"))
+    if not chunk_json_paths:
+        return None
+
+    output_dir = run_dir / "output"
+    frames_selected_dir = run_dir / "frames_selected"
+    output_dir.mkdir(parents=True, exist_ok=True)
+    frames_selected_dir.mkdir(parents=True, exist_ok=True)
+    _clear_generated_run_outputs(run_dir)
+
+    records: List[Dict[str, Any]] = []
+    captioner_blocks: List[str] = []
+    for json_path in chunk_json_paths:
+        try:
+            chunk_data = json.loads(json_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            continue
+
+        records.extend(chunk_data.get("windows", []) or [])
+        captioner_path = json_path.parent / "captioner.txt"
+        if captioner_path.exists():
+            try:
+                captioner_blocks.append(captioner_path.read_text(encoding="utf-8", errors="ignore").strip())
+            except OSError:
+                pass
+
+        source_frames_dir = json_path.parent.parent / "frames_selected"
+        for frame_path in source_frames_dir.glob("frame_*.*"):
+            target = frames_selected_dir / frame_path.name
+            if not target.exists():
+                shutil.copy2(frame_path, target)
+
+    selected_frames = sorted(frames_selected_dir.glob("frame_*.*"), key=_selected_frame_timestamp)
+    selected_index = {path.name: idx for idx, path in enumerate(selected_frames)}
+
+    for record in records:
+        frame_names = [name for name in record.get("frame_names", []) if name in selected_index]
+        if not frame_names:
+            continue
+        start_name = frame_names[0]
+        center_name = frame_names[len(frame_names) // 2]
+        end_name = frame_names[-1]
+        record["frame_names"] = frame_names
+        record["frame_name_start"] = start_name
+        record["frame_name_center"] = center_name
+        record["frame_name_end"] = end_name
+        record["frame_index_start"] = int(selected_index[start_name])
+        record["frame_index_center"] = int(selected_index[center_name])
+        record["frame_index_end"] = int(selected_index[end_name])
+
+    records = sorted(
+        records,
+        key=lambda record: float(record.get("timestamp_center", record.get("timestamp_start", 0.0)) or 0.0),
+    )
+    merged_captioner = "\n".join(block for block in captioner_blocks if block)
+    if merged_captioner:
+        (output_dir / "captioner.txt").write_text(merged_captioner + "\n", encoding="utf-8")
+
+    data = {
+        "video_name": video_name,
+        "video_total_s": video_total_s,
+        "threshold": float(threshold),
+        "window_step": int(window_step),
+        "prompt": prompt,
+        "segments": _compute_segments_from_records(records, float(threshold)),
+        "selected_frames": [
+            {"name": path.name, "timestamp": _selected_frame_timestamp(path)}
+            for path in selected_frames
+        ],
+        "windows": records,
+        "pipeline": "async_main_workflow_chunked",
+        "chunks": len(chunk_json_paths),
+    }
+
+    json_path = output_dir / f"{video_name}_inference_data.json"
+    with open(json_path, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2, ensure_ascii=False)
+    return json_path
+
+
 def _run_video_processing(
     video_path: str,
     llama_url: str,
@@ -801,7 +985,11 @@ def _run_video_processing(
         shutil.copy2(video, dest_video)
 
     video_fps, video_total_s, video_frame_count = _read_video_metadata(dest_video)
-    config = _build_async_pipeline_config(
+    chunk_seconds = _env_int("MUVAD_CHUNK_SECONDS", DEFAULT_CHUNK_SECONDS)
+    chunks = _chunk_ranges(video_total_s, chunk_seconds)
+    analysis_fps = _env_float("MUVAD_ANALYSIS_FPS", DEFAULT_ANALYSIS_FPS)
+    frame_stride = max(1, int(round(float(video_fps or 30.0) / analysis_fps)))
+    preview_config = _build_async_pipeline_config(
         video_path=dest_video,
         run_dir=run_dir,
         llama_url=llama_url,
@@ -815,84 +1003,186 @@ def _run_video_processing(
     yield f"Run directory: {run_dir}\n"
     yield "Pipeline: async main workflow (Extractor -> Selector -> Captioner -> Detector -> Notifier)\n"
     yield f"Video FPS: {video_fps:.2f} | Frames: {video_frame_count} | Duration: {video_total_s:.2f}s\n"
-    yield "Extractor pacing: disabled (processing as fast as decoding/model inference allow)\n"
+    yield f"Extractor sampling: target_fps={analysis_fps:g}, frame_stride={frame_stride} (skips frames before decoding to PIL)\n"
+    if len(chunks) > 1:
+        yield f"Chunking: enabled, {len(chunks)} chunks of up to {chunk_seconds}s; completed chunks are reused on resume.\n"
+    else:
+        yield "Chunking: disabled for this video length.\n"
+    llama_params = preview_config["captioner"]["parameters"]
+    yield (
+        "llama.cpp memory settings: "
+        f"np={llama_params.get('np')}, "
+        f"ctx_len={llama_params.get('ctx_len')}, "
+        f"batch={llama_params.get('batch')}, "
+        f"ubatch={llama_params.get('ubatch')}, "
+        f"cont_batching={llama_params.get('cont_batching')}\n"
+    )
+    if _is_server_running(_normalize_llama_host(llama_url)):
+        yield "llama.cpp server: already running; restart it to apply changed startup settings if it was launched with older values.\n"
     if autostart_server:
         yield "Autostart server: enabled\n\n"
     else:
         yield "Autostart server: disabled (ensure server is running)\n\n"
 
-    status_queue: queue.Queue[Tuple[str, Any]] = queue.Queue()
+    accumulated = ""
+    final_json_path: Optional[Path] = None
+    any_anomalous = False
 
-    def run_worker() -> None:
-        try:
-            from scripts.prediction.workflow import initialize_modules, workflow
+    for chunk_idx, start_time, end_time in chunks:
+        chunked = len(chunks) > 1
+        active_run_dir = _chunk_run_dir(run_dir, chunk_idx) if chunked else run_dir
+        active_run_dir.mkdir(parents=True, exist_ok=True)
+        for directory in (active_run_dir / "output", active_run_dir / "frames_selected"):
+            directory.mkdir(parents=True, exist_ok=True)
 
-            status_queue.put(("log", "Initializing modules...\n"))
-            modules = initialize_modules(config)
-            status_queue.put(("log", "Modules ready. Streaming frames through the async pipeline...\n"))
-            result = bool(workflow(*modules, config))
-            json_path = _save_async_inference_data(
+        existing_chunk_json = _chunk_inference_path(active_run_dir) if chunked else None
+        chunk_label = (
+            f"Chunk {chunk_idx + 1}/{len(chunks)} [{start_time:.1f}s - {end_time:.1f}s]"
+            if chunked
+            else "Full video"
+        )
+
+        if existing_chunk_json is not None:
+            accumulated += f"{chunk_label}: already processed, skipping.\n"
+            final_json_path = _merge_chunk_results(
                 run_dir=run_dir,
                 video_name=video.stem,
                 prompt=prompt,
-                threshold=float(config["notifier"]["threshold"]),
-                window_step=int(config["captioner"]["batch_size"]),
+                threshold=float(preview_config["notifier"]["threshold"]),
+                window_step=int(preview_config["captioner"]["batch_size"]),
                 video_total_s=video_total_s,
             )
-            status_queue.put(("done", (result, json_path)))
-        except Exception as exc:
-            status_queue.put(("error", exc))
-
-    worker = threading.Thread(target=run_worker, daemon=True)
-    worker.start()
-
-    accumulated = ""
-    last_progress = 0.0
-    while worker.is_alive() or not status_queue.empty():
-        try:
-            kind, payload = status_queue.get(timeout=0.5)
-        except queue.Empty:
-            now = time.time()
-            if now - last_progress >= 10.0:
-                selected_count = len(list(frames_selected_dir.glob("frame_*.*")))
-                captioner_path = output_dir / "captioner.txt"
-                window_count = 0
-                if captioner_path.exists():
-                    try:
-                        window_count = captioner_path.read_text(
-                            encoding="utf-8",
-                            errors="ignore",
-                        ).count("- frames: ")
-                    except Exception:
-                        window_count = 0
-                accumulated += (
-                    f"Progress: selected frames={selected_count}, "
-                    f"completed windows={window_count}\n"
-                )
-                last_progress = now
-                yield accumulated
+            yield accumulated
             continue
 
-        if kind == "log":
-            accumulated += str(payload)
-            yield accumulated
-        elif kind == "done":
-            result, json_path = payload
-            data = _load_inference_data(run_dir.name)
-            windows_count = len(data.get("windows", [])) if data else 0
-            selected_count = len(data.get("selected_frames", [])) if data else len(list(frames_selected_dir.glob("frame_*.*")))
-            accumulated += "\nProcessing complete!\n"
-            accumulated += f"Prediction: {'anomalous' if result else 'normal'}\n"
-            accumulated += f"Selected frames: {selected_count} | Analysis windows: {windows_count}\n"
-            accumulated += f"Inference data saved to: {json_path}\n"
-            yield accumulated
-        elif kind == "error":
-            accumulated += f"\nProcessing failed: {payload}\n"
-            yield accumulated
+        config = _build_async_pipeline_config(
+            video_path=dest_video,
+            run_dir=active_run_dir,
+            llama_url=llama_url,
+            llama_model=llama_model,
+            prompt=prompt,
+            autostart_server=autostart_server,
+            video_fps=video_fps,
+            start_time=start_time,
+            end_time=end_time if video_total_s > 0 else None,
+        )
 
-    worker.join(timeout=1.0)
-    if worker.is_alive():
-        yield accumulated + "\nProcessing is still shutting down.\n"
+        status_queue: queue.Queue[Tuple[str, Any]] = queue.Queue()
+
+        def run_worker() -> None:
+            try:
+                from scripts.prediction.workflow import initialize_modules, workflow
+
+                status_queue.put(("log", f"{chunk_label}: initializing modules...\n"))
+                modules = initialize_modules(config)
+                status_queue.put(("log", f"{chunk_label}: modules ready.\n"))
+                result = bool(workflow(*modules, config))
+                json_path = _save_async_inference_data(
+                    run_dir=active_run_dir,
+                    video_name=video.stem,
+                    prompt=prompt,
+                    threshold=float(config["notifier"]["threshold"]),
+                    window_step=int(config["captioner"]["batch_size"]),
+                    video_total_s=video_total_s,
+                )
+                status_queue.put(("done", (result, json_path)))
+            except Exception as exc:
+                status_queue.put(("error", exc))
+
+        worker = threading.Thread(target=run_worker, daemon=True)
+        worker.start()
+
+        last_progress = 0.0
+        active_frames_selected_dir = active_run_dir / "frames_selected"
+        active_output_dir = active_run_dir / "output"
+        while worker.is_alive() or not status_queue.empty():
+            try:
+                kind, payload = status_queue.get(timeout=0.5)
+            except queue.Empty:
+                now = time.time()
+                if now - last_progress >= 10.0:
+                    selected_count = len(list(active_frames_selected_dir.glob("frame_*.*")))
+                    captioner_path = active_output_dir / "captioner.txt"
+                    window_count = 0
+                    if captioner_path.exists():
+                        try:
+                            window_count = captioner_path.read_text(
+                                encoding="utf-8",
+                                errors="ignore",
+                            ).count("- frames: ")
+                        except Exception:
+                            window_count = 0
+                    accumulated += (
+                        f"{chunk_label}: selected frames={selected_count}, "
+                        f"completed windows={window_count}\n"
+                    )
+                    last_progress = now
+                    yield accumulated
+                continue
+
+            if kind == "log":
+                accumulated += str(payload)
+                yield accumulated
+            elif kind == "done":
+                result, json_path = payload
+                any_anomalous = any_anomalous or bool(result)
+                if chunked:
+                    final_json_path = _merge_chunk_results(
+                        run_dir=run_dir,
+                        video_name=video.stem,
+                        prompt=prompt,
+                        threshold=float(config["notifier"]["threshold"]),
+                        window_step=int(config["captioner"]["batch_size"]),
+                        video_total_s=video_total_s,
+                    )
+                    merged_data = _load_inference_data(run_dir.name)
+                    windows_count = len(merged_data.get("windows", [])) if merged_data else 0
+                    selected_count = len(merged_data.get("selected_frames", [])) if merged_data else len(list(frames_selected_dir.glob("frame_*.*")))
+                    accumulated += f"{chunk_label}: complete. Chunk data saved to: {json_path}\n"
+                    accumulated += f"Merged progress: selected frames={selected_count} | analysis windows={windows_count}\n"
+                    if final_json_path:
+                        accumulated += f"Merged inference data saved to: {final_json_path}\n"
+                else:
+                    final_json_path = json_path
+                    data = _load_inference_data(run_dir.name)
+                    windows_count = len(data.get("windows", [])) if data else 0
+                    selected_count = len(data.get("selected_frames", [])) if data else len(list(frames_selected_dir.glob("frame_*.*")))
+                    accumulated += "\nProcessing complete!\n"
+                    accumulated += f"Prediction: {'anomalous' if result else 'normal'}\n"
+                    accumulated += f"Selected frames: {selected_count} | Analysis windows: {windows_count}\n"
+                    accumulated += f"Inference data saved to: {json_path}\n"
+                yield accumulated
+            elif kind == "error":
+                accumulated += f"\nProcessing failed: {payload}\n"
+                yield accumulated
+                return
+
+        worker.join(timeout=1.0)
+        if worker.is_alive():
+            yield accumulated + "\nProcessing is still shutting down.\n"
+            return
+
+    if len(chunks) > 1:
+        final_json_path = final_json_path or _merge_chunk_results(
+            run_dir=run_dir,
+            video_name=video.stem,
+            prompt=prompt,
+            threshold=float(preview_config["notifier"]["threshold"]),
+            window_step=int(preview_config["captioner"]["batch_size"]),
+            video_total_s=video_total_s,
+        )
+        data = _load_inference_data(run_dir.name)
+        if data:
+            any_anomalous = any(
+                bool(window.get("is_anomalous")) or float(window.get("anomaly_score", 0.0)) >= float(data.get("threshold", 0.5))
+                for window in data.get("windows", [])
+            )
+            accumulated += "\nProcessing complete!\n"
+            accumulated += f"Prediction: {'anomalous' if any_anomalous else 'normal'}\n"
+            accumulated += f"Selected frames: {len(data.get('selected_frames', []))} | Analysis windows: {len(data.get('windows', []))}\n"
+        if final_json_path:
+            accumulated += f"Inference data saved to: {final_json_path}\n"
+        yield accumulated
 
 
 # ------------------------------
