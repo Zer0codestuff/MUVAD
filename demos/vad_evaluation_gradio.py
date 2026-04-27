@@ -233,6 +233,8 @@ DEFAULT_CAPTION_PARALLEL_WINDOWS = 2
 DEFAULT_CHUNK_WORKERS = 1
 DEFAULT_FRAME_SAVE_EXT = "jpg"
 DEFAULT_IMAGE_QUALITY = 85
+DEFAULT_LLAMA_REASONING = False
+DEFAULT_LLAMA_REASONING_BUDGET = 0
 
 # Cache for summaries (run_name -> summary)
 _summary_cache: Dict[str, str] = {}
@@ -336,6 +338,7 @@ def _start_llama_server(
             cmd.append("--cont-batching")
         if flash_attn:
             cmd += ["--flash-attn", "on"]
+        cmd += ["--reasoning", "off", "--reasoning-budget", str(DEFAULT_LLAMA_REASONING_BUDGET)]
         
         print(f"[LLM Server] Command: {' '.join(cmd)}")
         print(f"[LLM Server] Log file: {log_path}")
@@ -779,6 +782,7 @@ def _build_async_pipeline_config(
     caption_window_size: Optional[int] = None,
     llama_flash_attn: Optional[bool] = None,
     llama_cont_batching: Optional[bool] = None,
+    llama_reasoning: Optional[bool] = None,
 ) -> Dict[str, Any]:
     from scripts.prediction.workflow import read_config
 
@@ -802,6 +806,7 @@ def _build_async_pipeline_config(
     parallel_windows = int(caption_parallel_windows) if caption_parallel_windows else _env_int("MUVAD_CAPTION_PARALLEL_WINDOWS", DEFAULT_CAPTION_PARALLEL_WINDOWS)
     flash_attn = _env_bool("MUVAD_LLAMA_FLASH_ATTN", True) if llama_flash_attn is None else bool(llama_flash_attn)
     cont_batching = _env_bool("MUVAD_LLAMA_CONT_BATCHING", True) if llama_cont_batching is None else bool(llama_cont_batching)
+    reasoning = _env_bool("MUVAD_LLAMA_REASONING", DEFAULT_LLAMA_REASONING) if llama_reasoning is None else bool(llama_reasoning)
     ctx_len = max(1024, ctx_len)
     batch_size = max(1, batch_size)
     ubatch_size = max(1, ubatch_size)
@@ -819,6 +824,8 @@ def _build_async_pipeline_config(
         "top_p": 0.0,
         "cont_batching": cont_batching,
         "flash_attn": flash_attn,
+        "reasoning": reasoning,
+        "reasoning_budget": DEFAULT_LLAMA_REASONING_BUDGET if not reasoning else _env_int("MUVAD_LLAMA_REASONING_BUDGET", DEFAULT_LLAMA_REASONING_BUDGET),
         "ngl": captioner_params.get("ngl", 999),
         "ctx_len": ctx_len,
         "batch": batch_size,
@@ -1097,6 +1104,7 @@ def _run_video_processing(
     caption_window_size: Optional[int] = None,
     llama_flash_attn: Optional[bool] = None,
     llama_cont_batching: Optional[bool] = None,
+    llama_reasoning: Optional[bool] = None,
     chunk_workers_override: Optional[int] = None,
 ) -> Iterator[str]:
     """Run the VAD pipeline on a video and yield log output."""
@@ -1150,6 +1158,7 @@ def _run_video_processing(
         caption_window_size=caption_window_size,
         llama_flash_attn=llama_flash_attn,
         llama_cont_batching=llama_cont_batching,
+        llama_reasoning=llama_reasoning,
     )
 
     yield f"Starting processing: {video.name}\n"
@@ -1171,7 +1180,9 @@ def _run_video_processing(
         f"batch={llama_params.get('batch')}, "
         f"ubatch={llama_params.get('ubatch')}, "
         f"cont_batching={llama_params.get('cont_batching')}, "
-        f"flash_attn={llama_params.get('flash_attn')}\n"
+        f"flash_attn={llama_params.get('flash_attn')}, "
+        f"reasoning={llama_params.get('reasoning')}, "
+        f"reasoning_budget={llama_params.get('reasoning_budget')}\n"
     )
     yield (
         "Caption throughput settings: "
@@ -1221,6 +1232,7 @@ def _run_video_processing(
             caption_window_size=caption_window_size,
             llama_flash_attn=llama_flash_attn,
             llama_cont_batching=llama_cont_batching,
+            llama_reasoning=llama_reasoning,
         )
         from scripts.prediction.workflow import initialize_modules, workflow
 
@@ -1409,6 +1421,7 @@ def _run_video_processing(
             caption_window_size=caption_window_size,
             llama_flash_attn=llama_flash_attn,
             llama_cont_batching=llama_cont_batching,
+            llama_reasoning=llama_reasoning,
         )
 
         status_queue: queue.Queue[Tuple[str, Any]] = queue.Queue()
@@ -2743,6 +2756,11 @@ def build_interface() -> gr.Blocks:
                                 value=True,
                                 info="Improves throughput when multiple requests are in flight.",
                             )
+                            upload_reasoning_checkbox = gr.Checkbox(
+                                label="Reasoning / thinking mode",
+                                value=DEFAULT_LLAMA_REASONING,
+                                info="Keep OFF for VAD JSON output. Thinking models can otherwise return empty content.",
+                            )
 
                     upload_process_btn = gr.Button("Process uploaded video", variant="secondary")
                     upload_process_logs = gr.Textbox(
@@ -2921,6 +2939,7 @@ def build_interface() -> gr.Blocks:
                     ubatch_size,
                     flash_attn,
                     cont_batching,
+                    reasoning,
                 ):
                     if not file_path:
                         yield "Error: Please upload a video first.", gr.update(), "_No uploaded video selected._"
@@ -2948,6 +2967,7 @@ def build_interface() -> gr.Blocks:
                         llama_ubatch_size=int(ubatch_size or DEFAULT_LLAMA_UBATCH),
                         llama_flash_attn=bool(flash_attn),
                         llama_cont_batching=bool(cont_batching),
+                        llama_reasoning=bool(reasoning),
                     ):
                         latest_log = log
                         yield latest_log, gr.update(), processing_status
@@ -2979,6 +2999,7 @@ def build_interface() -> gr.Blocks:
                         upload_ubatch_input,
                         upload_flash_attn_checkbox,
                         upload_cont_batching_checkbox,
+                        upload_reasoning_checkbox,
                     ],
                     outputs=[upload_process_logs, run_selector, upload_status],
                 )
@@ -3165,6 +3186,11 @@ def build_interface() -> gr.Blocks:
                             value=True,
                             info="Improves throughput when multiple requests are in flight.",
                         )
+                        reasoning_checkbox = gr.Checkbox(
+                            label="Reasoning / thinking mode",
+                            value=DEFAULT_LLAMA_REASONING,
+                            info="Keep OFF for VAD JSON output. Thinking models can otherwise return empty content.",
+                        )
 
                 process_btn = gr.Button(t("start_processing", "en"), variant="primary")
 
@@ -3212,6 +3238,7 @@ def build_interface() -> gr.Blocks:
                     ubatch_size,
                     flash_attn,
                     cont_batching,
+                    reasoning,
                 ):
                     if not video_name or video_name not in paths:
                         yield "Error: Please select a video first."
@@ -3232,6 +3259,7 @@ def build_interface() -> gr.Blocks:
                         llama_ubatch_size=int(ubatch_size or DEFAULT_LLAMA_UBATCH),
                         llama_flash_attn=bool(flash_attn),
                         llama_cont_batching=bool(cont_batching),
+                        llama_reasoning=bool(reasoning),
                     ):
                         yield log
 
@@ -3253,6 +3281,7 @@ def build_interface() -> gr.Blocks:
                         ubatch_input,
                         flash_attn_checkbox,
                         cont_batching_checkbox,
+                        reasoning_checkbox,
                     ],
                     outputs=[process_logs],
                 )

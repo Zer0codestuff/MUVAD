@@ -66,6 +66,8 @@ def restart_llamacpp_server(host: str, server_cfg: dict | None = None, timeout: 
     batch_size = server_cfg.get("batch") or server_cfg.get("b")
     ubatch_size = server_cfg.get("ub") or server_cfg.get("ubatch")
     ctx_len = server_cfg.get("ctx_len") or server_cfg.get("c")
+    reasoning = server_cfg.get("reasoning")
+    reasoning_budget = server_cfg.get("reasoning_budget") or server_cfg.get("reasoning-budget")
     extra_args: list[str] = server_cfg.get("extra", [])
 
     # Allow full command override
@@ -108,6 +110,12 @@ def restart_llamacpp_server(host: str, server_cfg: dict | None = None, timeout: 
         cmd += ["-ub", str(ubatch_size)]
     if not explicit_cmd and ctx_len is not None:
         cmd += ["-c", str(ctx_len)]
+    if not explicit_cmd and reasoning is not None:
+        if isinstance(reasoning, bool):
+            reasoning = "on" if reasoning else "off"
+        cmd += ["--reasoning", str(reasoning)]
+    if not explicit_cmd and reasoning_budget is not None:
+        cmd += ["--reasoning-budget", str(reasoning_budget)]
     if not explicit_cmd and extra_args:
         cmd += [str(a) for a in extra_args]
 
@@ -222,7 +230,8 @@ class LlamaCppModel:
             server_cfg["model"] = local_model
         for key in ("ngl", "np", "flash_attn", "flash-attn", "flash_attention",
                     "cont_batching", "cont-batching", "ctx_len", "c", "batch", "b",
-                    "ubatch", "ub", "extra", "ready_timeout", "show_output",
+                    "ubatch", "ub", "reasoning", "reasoning_budget", "reasoning-budget",
+                    "extra", "ready_timeout", "show_output",
                     "log_file", "log_path", "startup_timeout"):
             if key in params:
                 server_cfg[key] = params.pop(key)
@@ -241,6 +250,8 @@ class LlamaCppModel:
             server_cfg["batch"] = server_cfg.pop("b")
         if "ub" in server_cfg:
             server_cfg["ub"] = server_cfg.pop("ub")
+        if "reasoning-budget" in server_cfg:
+            server_cfg["reasoning_budget"] = server_cfg.pop("reasoning-budget")
 
         if "model" not in server_cfg and "hf" not in server_cfg:
             server_cfg["hf"] = model_name
